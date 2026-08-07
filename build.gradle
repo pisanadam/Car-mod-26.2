@@ -18,6 +18,17 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
+
+	runs {
+		// Oyunu gerçekten açıp aracı, göstergeyi ve modifiye ekranını
+		// fotoğraflayan istemci testi. Başsız makinede: xvfb-run ./gradlew runClientGametest
+		clientGametest {
+			inherit client
+			name "Client Game Test"
+			vmArg "-Dfabric.client.gametest"
+			runDir "build/run/clientGametest"
+		}
+	}
 }
 
 dependencies {

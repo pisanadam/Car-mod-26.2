@@ -197,28 +197,36 @@ public final class CarMeshFactory {
 			body.width() - 8.0F, 3.0F, body.cabinLength() - 4.0F);
 	}
 
+	/**
+	 * Dört tekerlek yuvası kurar. Her yuvada dört tekerlek tipi baştan üretilir;
+	 * takılı olan görünür kılınır.
+	 *
+	 * <p>Tipler farklı yarıçapta olduğu için her biri kendi eksen yüksekliğinde
+	 * durur: lastik tam olarak yere değsin diye eksen, yarıçap kadar yukarıdadır.
+	 * Dönüş ve direksiyon açısı da tip grubuna uygulanır, böylece tekerlek yerde
+	 * bir noktanın etrafında savrulmak yerine kendi ekseninde döner.
+	 */
 	private static void buildWheels(final PartDefinition plain, final CarModel.Body body) {
 		final float halfBase = body.wheelbase() / 2.0F;
-		// Tekerlek merkezi gövde altının biraz üstünde durur.
-		final float axleY = top(body.clearance() * 0.55F + WheelType.WHEEL_STREET.radius() * 0.45F);
 		final float xOffset = body.width() / 2.0F - WHEEL_WIDTH * 0.35F;
 
 		for (final WheelPosition position : WheelPosition.values()) {
 			final float x = position.right() ? xOffset : -xOffset - WHEEL_WIDTH * 0.3F;
 			final float z = position.front() ? -halfBase : halfBase;
-			final PartDefinition wheel = plain.addOrReplaceChild(WHEEL_PREFIX + position.partName(),
-				CubeListBuilder.create(), PartPose.offset(x, axleY, z));
-
-			// Lastik her tekerlekte aynıdır; jant tipi değişince yalnızca
-			// görünür olan jant parçası değişir.
-			final float tireRadius = WheelType.WHEEL_OFFROAD.radius();
-			addBox(wheel, TIRE, CarTexture.TIRE,
-				-WHEEL_WIDTH / 2.0F, -tireRadius, -tireRadius,
-				WHEEL_WIDTH, tireRadius * 2.0F, tireRadius * 2.0F);
+			// Yuvanın kendisi yer hizasındadır; yükseklik tip grubundan gelir.
+			final PartDefinition slot = plain.addOrReplaceChild(WHEEL_PREFIX + position.partName(),
+				CubeListBuilder.create(), PartPose.offset(x, 0.0F, z));
 
 			for (final WheelType type : WheelType.values()) {
-				final float rimRadius = type.radius() * 0.62F;
-				addBox(wheel, type.itemName(), CarTexture.rimFor(type),
+				final float tireRadius = type.radius();
+				final float rimRadius = tireRadius * 0.60F;
+				final PartDefinition wheel = slot.addOrReplaceChild(type.itemName(),
+					CubeListBuilder.create(), PartPose.offset(0.0F, top(tireRadius), 0.0F));
+				addBox(wheel, TIRE, CarTexture.TIRE,
+					-WHEEL_WIDTH / 2.0F, -tireRadius, -tireRadius,
+					WHEEL_WIDTH, tireRadius * 2.0F, tireRadius * 2.0F);
+				// Jant lastiğin biraz dışına taşar ki yandan görünsün.
+				addBox(wheel, "rim", CarTexture.rimFor(type),
 					-WHEEL_WIDTH / 2.0F - 0.4F, -rimRadius, -rimRadius,
 					WHEEL_WIDTH + 0.8F, rimRadius * 2.0F, rimRadius * 2.0F);
 			}

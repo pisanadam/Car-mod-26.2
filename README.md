@@ -196,6 +196,14 @@ otomatik üretilir. `validate_assets.py` iki dosyanın uyumunu kontrol eder.
 JAVA_HOME=<jdk25> ./gradlew build     # derleme
 python3 tools/validate_assets.py      # kaynak bütünlüğü
 JAVA_HOME=<jdk25> tools/smoke_test.sh # başsız sunucuda 12 aracı spawn edip günlüğü tarar
+
+# Oyunu gerçekten açan görsel test: dünya kurar, araçları çıkarır, bir tanesine
+# binip gaza basar ve hızlandığını doğrular, sonra ekran görüntülerini
+# build/run/clientGametest/screenshots altına bırakır.
+JAVA_HOME=<jdk25> ./gradlew runClientGametest
+# Başsız bir makinede (yazılım OpenGL ile):
+LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x720x24" \
+  ./gradlew runClientGametest
 ```
 
 ---

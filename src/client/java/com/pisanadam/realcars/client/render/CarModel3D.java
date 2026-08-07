@@ -14,15 +14,19 @@ import net.minecraft.util.Mth;
  * ikisini farklı renklerle gönderdiği için tek dokudan istenen boya çıkar.
  */
 public class CarModel3D extends EntityModel<CarRenderState> {
+	private static final int WHEEL_SLOTS = CarMeshFactory.WheelPosition.values().length;
+	/** Direksiyonun çevirebileceği en büyük açı (derece). */
+	private static final float MAX_STEER_DEGREES = 30.0F;
+
 	private final ModelPart painted;
 	private final ModelPart plain;
 	private final Map<SpoilerType, ModelPart> spoilers = new EnumMap<>(SpoilerType.class);
-	private final ModelPart[] wheels = new ModelPart[CarMeshFactory.WheelPosition.values().length];
-	private final Map<WheelType, ModelPart>[] rims = createRimMaps();
+	/** Her tekerlek yuvası için tip -> tekerlek parçası. */
+	private final Map<WheelType, ModelPart>[] wheels = newWheelSlots();
 
 	@SuppressWarnings("unchecked")
-	private static Map<WheelType, ModelPart>[] createRimMaps() {
-		return new Map[CarMeshFactory.WheelPosition.values().length];
+	private static Map<WheelType, ModelPart>[] newWheelSlots() {
+		return new Map[WHEEL_SLOTS];
 	}
 
 	public CarModel3D(final ModelPart root) {
@@ -38,13 +42,12 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		}
 
 		for (final CarMeshFactory.WheelPosition position : CarMeshFactory.WheelPosition.values()) {
-			final ModelPart wheel = this.plain.getChild(CarMeshFactory.WHEEL_PREFIX + position.partName());
-			this.wheels[position.ordinal()] = wheel;
-			final Map<WheelType, ModelPart> perWheel = new EnumMap<>(WheelType.class);
+			final ModelPart slot = this.plain.getChild(CarMeshFactory.WHEEL_PREFIX + position.partName());
+			final Map<WheelType, ModelPart> perType = new EnumMap<>(WheelType.class);
 			for (final WheelType type : WheelType.values()) {
-				perWheel.put(type, wheel.getChild(type.itemName()));
+				perType.put(type, slot.getChild(type.itemName()));
 			}
-			this.rims[position.ordinal()] = perWheel;
+			this.wheels[position.ordinal()] = perType;
 		}
 	}
 
@@ -66,14 +69,18 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		}
 
 		final float spin = state.wheelAngle * Mth.DEG_TO_RAD;
-		// Direksiyon açısı en fazla 30 derece; yalnızca ön tekerlekler döner.
-		final float steer = -state.steerAngle * 30.0F * Mth.DEG_TO_RAD;
+		final float steer = -state.steerAngle * MAX_STEER_DEGREES * Mth.DEG_TO_RAD;
 		for (final CarMeshFactory.WheelPosition position : CarMeshFactory.WheelPosition.values()) {
-			final ModelPart wheel = this.wheels[position.ordinal()];
-			wheel.xRot = spin;
-			wheel.yRot = position.front() ? steer : 0.0F;
-			for (final Map.Entry<WheelType, ModelPart> rim : this.rims[position.ordinal()].entrySet()) {
-				rim.getValue().visible = rim.getKey() == state.wheel;
+			for (final Map.Entry<WheelType, ModelPart> entry : this.wheels[position.ordinal()].entrySet()) {
+				final ModelPart wheel = entry.getValue();
+				wheel.visible = entry.getKey() == state.wheel;
+				if (!wheel.visible) {
+					continue;
+				}
+				// ModelPart dönüşleri Z-Y-X sırasıyla birleşir; böylece
+				// direksiyon (Y) dıştan, tekerlek dönüşü (X) içten uygulanır.
+				wheel.xRot = spin;
+				wheel.yRot = position.front() ? steer : 0.0F;
 			}
 		}
 	}

@@ -54,11 +54,11 @@ public class CarModificationMenu extends AbstractContainerMenu {
 		// Oyuncu envanteri — modifiye ekranının alt yarısı
 		for (int row = 0; row < 3; row++) {
 			for (int col = 0; col < 9; col++) {
-				this.addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 143 + row * 18));
+				this.addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 150 + row * 18));
 			}
 		}
 		for (int col = 0; col < 9; col++) {
-			this.addSlot(new Slot(inventory, col, 8 + col * 18, 201));
+			this.addSlot(new Slot(inventory, col, 8 + col * 18, 210));
 		}
 	}
 

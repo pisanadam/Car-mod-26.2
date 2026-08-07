@@ -19,6 +19,9 @@
 		],
 		"client": [
 			"com.pisanadam.realcars.client.RealCarsClient"
+		],
+		"fabric-client-gametest": [
+			"com.pisanadam.realcars.client.gametest.CarClientGameTest"
 		]
 	},
 	"mixins": [],

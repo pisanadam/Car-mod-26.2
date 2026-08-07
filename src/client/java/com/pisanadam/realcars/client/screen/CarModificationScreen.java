@@ -34,18 +34,18 @@ import org.joml.Vector3f;
 public class CarModificationScreen extends AbstractContainerScreen<CarModificationMenu> {
 	private static final Identifier BACKGROUND = RealCars.id("textures/gui/modification.png");
 	private static final int PANEL_WIDTH = 248;
-	private static final int PANEL_HEIGHT = 225;
+	private static final int PANEL_HEIGHT = 235;
 
 	private static final int PREVIEW_X = 7;
-	private static final int PREVIEW_Y = 20;
+	private static final int PREVIEW_Y = 36;
 	private static final int PREVIEW_W = 94;
-	private static final int PREVIEW_H = 118;
+	private static final int PREVIEW_H = 100;
 
 	private static final int OPTIONS_X = 106;
-	private static final int OPTIONS_Y = 20;
+	private static final int OPTIONS_Y = 36;
 	private static final int OPTIONS_W = 135;
 
-	private static final int TAB_Y = 3;
+	private static final int TAB_Y = 18;
 	private static final int TAB_W = 60;
 	private static final int TAB_H = 15;
 
@@ -75,7 +75,7 @@ public class CarModificationScreen extends AbstractContainerScreen<CarModificati
 		this.titleLabelX = 8;
 		this.titleLabelY = 6;
 		this.inventoryLabelX = 8;
-		this.inventoryLabelY = PANEL_HEIGHT - 92;
+		this.inventoryLabelY = 140;
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public class CarModificationScreen extends AbstractContainerScreen<CarModificati
 
 	private void buildColorGrid(final int x, final int y) {
 		final int perRow = 4;
-		final int cell = 30;
+		final int cell = 24;
 		for (int i = 0; i < CarColors.count(); i++) {
 			final int index = i;
 			final int cx = x + (i % perRow) * cell;
@@ -227,7 +227,9 @@ public class CarModificationScreen extends AbstractContainerScreen<CarModificati
 		final Quaternionf tilt = new Quaternionf().rotateX(-22.0F * Mth.DEG_TO_RAD);
 		rotation.mul(tilt);
 
-		final float scale = 260.0F / Math.max(24.0F, car.model().body().length());
+		// body().length() model birimi cinsinden (16 birim = 1 blok); önizleme
+		// kutusunda araç ~80 piksel yer kaplasın istiyoruz.
+		final float scale = 80.0F * 16.0F / Math.max(24.0F, car.model().body().length());
 		final Vector3f translation = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F, 0.0F);
 		graphics.entity(state, scale, translation, rotation, tilt, x0, y0, x1, y1);
 	}

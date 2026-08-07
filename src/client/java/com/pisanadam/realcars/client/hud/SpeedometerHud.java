@@ -27,17 +27,21 @@ public class SpeedometerHud implements HudElement {
 	private static final Identifier NEEDLE = RealCars.id("textures/gui/speedometer_needle.png");
 
 	private static final int DIAL_SIZE = 128;
+	/** Kadranın ekranda kaplayacağı kare kenar uzunluğu. */
 	private static final int DIAL_DRAW = 84;
+	private static final float DIAL_SCALE = (float) DIAL_DRAW / DIAL_SIZE;
 	private static final int NEEDLE_W = 16;
 	private static final int NEEDLE_H = 64;
-	private static final int NEEDLE_DRAW_W = 11;
-	private static final int NEEDLE_DRAW_H = 42;
+	/** İbre dokusunda dönme merkezinin (göbeğin) bulunduğu satır. */
+	private static final int NEEDLE_PIVOT_Y = 59;
 
 	/** Kadranın yay başlangıcı ve süpürdüğü açı (derece) — doku ile aynı. */
 	private static final float DIAL_START_DEG = 160.0F;
 	private static final float DIAL_SWEEP_DEG = 220.0F;
 
-	private static final int MARGIN = 8;
+	private static final int MARGIN_RIGHT = 8;
+	/** Devir ve yakıt çubukları hotbar hizasına düşmesin diye alt boşluk geniştir. */
+	private static final int MARGIN_BOTTOM = 30;
 
 	private float shownSpeed;
 	private float shownRpm;
@@ -60,8 +64,8 @@ public class SpeedometerHud implements HudElement {
 		this.shownSpeed = Mth.lerp(blend, this.shownSpeed, Math.abs(car.speedKmh()));
 		this.shownRpm = Mth.lerp(blend, this.shownRpm, car.rpm());
 
-		final int right = graphics.guiWidth() - MARGIN;
-		final int bottom = graphics.guiHeight() - MARGIN;
+		final int right = graphics.guiWidth() - MARGIN_RIGHT;
+		final int bottom = graphics.guiHeight() - MARGIN_BOTTOM;
 		final int dialX = right - DIAL_DRAW;
 		final int dialY = bottom - DIAL_DRAW;
 
@@ -71,21 +75,29 @@ public class SpeedometerHud implements HudElement {
 	}
 
 	private void drawDial(final GuiGraphicsExtractor graphics, final int x, final int y, final CarEntity car) {
-		graphics.blit(RenderPipelines.GUI_TEXTURED, DIAL, x, y, 0.0F, 0.0F,
-			DIAL_DRAW, DIAL_DRAW, DIAL_SIZE, DIAL_SIZE);
+		// blit'in genişlik/yükseklik parametreleri hem ekrandaki hem dokudaki
+		// bölgeyi belirtir, yani küçültmez — kırpar. Bu yüzden doku tam
+		// boyunda çizilip matris ile ölçekleniyor.
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y);
+		graphics.pose().scale(DIAL_SCALE, DIAL_SCALE);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DIAL, 0, 0, 0.0F, 0.0F,
+			DIAL_SIZE, DIAL_SIZE, DIAL_SIZE, DIAL_SIZE);
+		graphics.pose().popMatrix();
 
 		final float fraction = Mth.clamp(this.shownSpeed / Math.max(1.0F, car.topSpeedKmh()), 0.0F, 1.0F);
-		// Doku 0 derecede sağa bakar; ibre dokusu yukarı baktığı için 90 telafi.
-		final float angle = DIAL_START_DEG + DIAL_SWEEP_DEG * fraction - 90.0F;
+		// Kadran çentikleri ekran uzayında (Y aşağı) 0 = sağ olacak şekilde
+		// yerleştirildi. İbre dokusu yukarı, yani 270 dereceye bakıyor; istenen
+		// yöne dönmesi için saat yönünde (açı - 270), yani (açı + 90) gerekir.
+		final float angle = DIAL_START_DEG + DIAL_SWEEP_DEG * fraction + 90.0F;
 
-		final int centreX = x + DIAL_DRAW / 2;
-		final int centreY = y + DIAL_DRAW / 2;
 		graphics.pose().pushMatrix();
-		graphics.pose().translate(centreX, centreY);
+		graphics.pose().translate(x + DIAL_DRAW / 2.0F, y + DIAL_DRAW / 2.0F);
 		graphics.pose().rotate(angle * Mth.DEG_TO_RAD);
+		graphics.pose().scale(DIAL_SCALE, DIAL_SCALE);
 		graphics.blit(RenderPipelines.GUI_TEXTURED, NEEDLE,
-			-NEEDLE_DRAW_W / 2, -NEEDLE_DRAW_H + 4, 0.0F, 0.0F,
-			NEEDLE_DRAW_W, NEEDLE_DRAW_H, NEEDLE_W, NEEDLE_H);
+			-NEEDLE_W / 2, -NEEDLE_PIVOT_Y, 0.0F, 0.0F,
+			NEEDLE_W, NEEDLE_H, NEEDLE_W, NEEDLE_H);
 		graphics.pose().popMatrix();
 	}
 

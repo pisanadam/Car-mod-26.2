@@ -31,6 +31,18 @@ public final class CarKeyBindings {
 	private CarKeyBindings() {
 	}
 
+	/**
+	 * Sınıfı istemci başlatılırken yükler.
+	 *
+	 * <p>Tuş atamaları statik alanlarda kaydedildiği için sınıfın ne zaman
+	 * yüklendiği önemlidir: Fabric, oyun ayarları hazırlandıktan sonra yapılan
+	 * kayıtları reddeder. Sınıf ilk kullanımına (tick) bırakılırsa oyun
+	 * "GameOptions has already been initialised" diyip çöker; bu yüzden
+	 * onInitializeClient içinden açıkça çağrılır.
+	 */
+	public static void init() {
+	}
+
 	private static KeyMapping register(final String translationKey, final int key) {
 		return KeyMappingHelper.registerKeyMapping(
 			new KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, CATEGORY));

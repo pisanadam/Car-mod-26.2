@@ -24,14 +24,15 @@ public record CarTexture(int u, int v, int width, int height) {
 	public static final CarTexture INTERIOR = new CarTexture(256, 128, 256, 128);
 	public static final CarTexture TIRE = new CarTexture(0, 256, 128, 128);
 	public static final CarTexture GRILLE = new CarTexture(128, 256, 128, 128);
-	public static final CarTexture UNDER = new CarTexture(256, 256, 128, 128);
-	public static final CarTexture CHROME = new CarTexture(384, 256, 128, 128);
+	/** Alt gövde araç boyunda olduğu için geniş bir bölge gerektirir. */
+	public static final CarTexture UNDER = new CarTexture(256, 256, 256, 128);
 	public static final CarTexture RIM_STREET = new CarTexture(0, 384, 64, 64);
 	public static final CarTexture RIM_SPORT = new CarTexture(64, 384, 64, 64);
 	public static final CarTexture RIM_OFFROAD = new CarTexture(128, 384, 64, 64);
 	public static final CarTexture RIM_CHROME = new CarTexture(192, 384, 64, 64);
 	public static final CarTexture LIGHT_FRONT = new CarTexture(256, 384, 64, 64);
 	public static final CarTexture LIGHT_REAR = new CarTexture(320, 384, 64, 64);
+	public static final CarTexture CHROME = new CarTexture(384, 384, 128, 128);
 
 	/**
 	 * Verilen ölçülerdeki bir kutunun UV ayak izi bu bölgeye sığıyor mu?

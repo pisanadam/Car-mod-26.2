@@ -34,14 +34,16 @@ ATLAS_REGIONS = {
     "interior":    (256, 128, 256, 128),
     "tire":        (0, 256, 128, 128),
     "grille":      (128, 256, 128, 128),
-    "under":       (256, 256, 128, 128),
-    "chrome":      (384, 256, 128, 128),
+    # Alt gövde neredeyse aracın tamamı kadar uzun, bu yüzden ayak izi 200
+    # birimi aşabiliyor; bölge 256 birim geniş olmak zorunda.
+    "under":       (256, 256, 256, 128),
     "rim_street":  (0, 384, 64, 64),
     "rim_sport":   (64, 384, 64, 64),
     "rim_offroad": (128, 384, 64, 64),
     "rim_chrome":  (192, 384, 64, 64),
     "light_front": (256, 384, 64, 64),
     "light_rear":  (320, 384, 64, 64),
+    "chrome":      (384, 384, 128, 128),
 }
 
 
@@ -528,14 +530,14 @@ def gen_gui():
     # seçenek alanı, altta oyuncu envanteri. Ölçüler CarModificationScreen
     # içindeki sabitlerle birebir aynıdır.
     c = Canvas(256, 256)
-    _panel(c, 0, 0, 248, 225)
-    _inset(c, 7, 20, 94, 118)      # önizleme
-    _inset(c, 106, 20, 135, 118)   # seçenekler
+    _panel(c, 0, 0, 248, 235)
+    _inset(c, 7, 36, 94, 100)      # önizleme
+    _inset(c, 106, 36, 135, 100)   # seçenekler
     for row in range(3):
         for col in range(9):
-            _slot(c, 7 + col * 18, 143 + row * 18)
+            _slot(c, 7 + col * 18, 150 + row * 18)
     for col in range(9):
-        _slot(c, 7 + col * 18, 201)
+        _slot(c, 7 + col * 18, 210)
     c.save(out / "modification.png")
 
     # --- montaj tezgahı ekranı arka planı ---

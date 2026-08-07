@@ -25,7 +25,7 @@
   "gui.realcars.missing_part": "Required part not in inventory",
   "gui.realcars.modification": "Vehicle Tuning",
   "gui.realcars.tab.color": "Colour",
-  "gui.realcars.tab.engine": "Engine & Gearbox",
+  "gui.realcars.tab.engine": "Engine",
   "gui.realcars.tab.spoiler": "Spoiler",
   "gui.realcars.tab.wheel": "Wheels",
   "hud.realcars.fuel": "Fuel",

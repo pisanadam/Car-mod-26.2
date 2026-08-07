@@ -15,10 +15,10 @@ import net.minecraft.util.StringRepresentable;
  * tutuş çarpanıdır; ikisi arasındaki fark modifiyenin sürüşe etkisini belirler.
  */
 public enum WheelType implements StringRepresentable {
-	WHEEL_STREET("wheel_street", 1.00F, 0.55F, 7.0F),
-	WHEEL_SPORT("wheel_sport", 1.18F, 0.42F, 7.0F),
-	WHEEL_OFFROAD("wheel_offroad", 0.82F, 1.00F, 8.5F),
-	WHEEL_CHROME("wheel_chrome", 1.05F, 0.50F, 7.5F);
+	WHEEL_STREET("wheel_street", 1.00F, 0.55F, 5.0F),
+	WHEEL_SPORT("wheel_sport", 1.18F, 0.42F, 5.2F),
+	WHEEL_OFFROAD("wheel_offroad", 0.82F, 1.00F, 6.6F),
+	WHEEL_CHROME("wheel_chrome", 1.05F, 0.50F, 5.4F);
 
 	public static final Codec<WheelType> CODEC = StringRepresentable.fromEnum(WheelType::values);
 	private static final IntFunction<WheelType> BY_ID =
@@ -55,7 +55,10 @@ public enum WheelType implements StringRepresentable {
 		return this.offroadGrip;
 	}
 
-	/** Model birimi cinsinden tekerlek yarıçapı (16 birim = 1 blok). */
+	/**
+	 * Model birimi cinsinden tekerlek yarıçapı (16 birim = 1 blok = 1 m).
+	 * Gerçek bir araç lastiği ~0.64 m çapındadır, arazi lastikleri daha iri.
+	 */
 	public float radius() {
 		return this.radius;
 	}
