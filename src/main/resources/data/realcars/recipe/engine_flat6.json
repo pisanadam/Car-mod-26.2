@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "P": "minecraft:piston",
+    "S": "realcars:steel_plate",
+    "I": "minecraft:iron_block",
+    "C": "minecraft:copper_block"
+  },
+  "pattern": [
+    "P_P",
+    "SIS",
+    "SCS"
+  ],
+  "result": {
+    "id": "realcars:engine_flat6"
+  }
+}

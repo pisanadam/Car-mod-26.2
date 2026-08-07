@@ -1,0 +1,11 @@
+{
+  "values": [
+    "realcars:assembly_table",
+    "realcars:car_lift",
+    "realcars:fuel_pump",
+    "realcars:asphalt",
+    "realcars:asphalt_slab",
+    "realcars:road_line_white",
+    "realcars:road_line_yellow"
+  ]
+}

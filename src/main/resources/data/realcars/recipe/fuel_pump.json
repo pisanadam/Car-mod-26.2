@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "S": "realcars:steel_plate",
+    "B": "minecraft:bucket",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "SSS",
+    "SBS",
+    "SRS"
+  ],
+  "result": {
+    "id": "realcars:fuel_pump"
+  }
+}

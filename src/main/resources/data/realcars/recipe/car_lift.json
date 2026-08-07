@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "S": "realcars:steel_plate",
+    "P": "minecraft:piston",
+    "I": "minecraft:iron_block"
+  },
+  "pattern": [
+    "SSS",
+    "_P_",
+    "SIS"
+  ],
+  "result": {
+    "id": "realcars:car_lift"
+  }
+}

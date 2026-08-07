@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "R": "realcars:rubber",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "_R_",
+    "RIR",
+    "_R_"
+  ],
+  "result": {
+    "id": "realcars:wheel_street",
+    "count": 2
+  }
+}

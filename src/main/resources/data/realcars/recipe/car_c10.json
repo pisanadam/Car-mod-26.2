@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "realcars:wheel_street",
+    "G": "realcars:windshield",
+    "E": "realcars:engine_v8",
+    "C": "realcars:chassis_classic",
+    "T": "realcars:transmission_manual",
+    "S": "realcars:car_seat"
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "id": "realcars:car_c10"
+  }
+}

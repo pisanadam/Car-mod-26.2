@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "S": "realcars:steel_plate",
+    "P": "#minecraft:planks",
+    "C": "minecraft:crafting_table"
+  },
+  "pattern": [
+    "SSS",
+    "PCP",
+    "PPP"
+  ],
+  "result": {
+    "id": "realcars:assembly_table"
+  }
+}

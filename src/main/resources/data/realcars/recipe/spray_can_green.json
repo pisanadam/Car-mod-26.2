@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "realcars:steel_plate",
+    "minecraft:iron_nugget",
+    "minecraft:green_dye"
+  ],
+  "result": {
+    "id": "realcars:spray_can_green",
+    "count": 2
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "S": "realcars:steel_plate",
+    "D": "minecraft:diamond",
+    "C": "minecraft:comparator"
+  },
+  "pattern": [
+    "_N_",
+    "SDS",
+    "_C_"
+  ],
+  "result": {
+    "id": "realcars:transmission_sport"
+  }
+}

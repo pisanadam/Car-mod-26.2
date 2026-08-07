@@ -1,0 +1,128 @@
+{
+  "engine_idle": {
+    "subtitle": "subtitles.realcars.engine_idle",
+    "sounds": [
+      {
+        "name": "realcars:engine_idle",
+        "stream": false
+      }
+    ]
+  },
+  "engine_loop_i4": {
+    "subtitle": "subtitles.realcars.engine_loop_i4",
+    "sounds": [
+      {
+        "name": "realcars:engine_loop_i4",
+        "stream": false
+      }
+    ]
+  },
+  "engine_loop_i6": {
+    "subtitle": "subtitles.realcars.engine_loop_i6",
+    "sounds": [
+      {
+        "name": "realcars:engine_loop_i6",
+        "stream": false
+      }
+    ]
+  },
+  "engine_loop_v6": {
+    "subtitle": "subtitles.realcars.engine_loop_v6",
+    "sounds": [
+      {
+        "name": "realcars:engine_loop_v6",
+        "stream": false
+      }
+    ]
+  },
+  "engine_loop_v8": {
+    "subtitle": "subtitles.realcars.engine_loop_v8",
+    "sounds": [
+      {
+        "name": "realcars:engine_loop_v8",
+        "stream": false
+      }
+    ]
+  },
+  "engine_loop_flat6": {
+    "subtitle": "subtitles.realcars.engine_loop_flat6",
+    "sounds": [
+      {
+        "name": "realcars:engine_loop_flat6",
+        "stream": false
+      }
+    ]
+  },
+  "engine_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine_start",
+        "stream": false
+      }
+    ]
+  },
+  "engine_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine_stop",
+        "stream": false
+      }
+    ]
+  },
+  "horn": {
+    "subtitle": "subtitles.realcars.horn",
+    "sounds": [
+      {
+        "name": "realcars:horn",
+        "stream": false
+      }
+    ]
+  },
+  "brake_squeal": {
+    "subtitle": "subtitles.realcars.brake_squeal",
+    "sounds": [
+      {
+        "name": "realcars:brake_squeal",
+        "stream": false
+      }
+    ]
+  },
+  "gravel_loop": {
+    "subtitle": "subtitles.realcars.gravel_loop",
+    "sounds": [
+      {
+        "name": "realcars:gravel_loop",
+        "stream": false
+      }
+    ]
+  },
+  "crash": {
+    "subtitle": "subtitles.realcars.crash",
+    "sounds": [
+      {
+        "name": "realcars:crash",
+        "stream": false
+      }
+    ]
+  },
+  "door_close": {
+    "subtitle": "subtitles.realcars.door_close",
+    "sounds": [
+      {
+        "name": "realcars:door_close",
+        "stream": false
+      }
+    ]
+  },
+  "wrench_use": {
+    "subtitle": "subtitles.realcars.wrench_use",
+    "sounds": [
+      {
+        "name": "realcars:wrench_use",
+        "stream": false
+      }
+    ]
+  }
+}

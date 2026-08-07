@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "realcars:wheel_offroad",
+    "G": "realcars:windshield",
+    "E": "realcars:engine_i6",
+    "C": "realcars:chassis_offroad",
+    "T": "realcars:transmission_automatic",
+    "S": "realcars:car_seat"
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "id": "realcars:car_defender"
+  }
+}

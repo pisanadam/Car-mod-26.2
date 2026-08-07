@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "realcars:block/car_lift"
+    }
+  }
+}

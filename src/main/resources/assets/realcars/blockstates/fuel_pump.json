@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "realcars:block/fuel_pump"
+    },
+    "facing=east": {
+      "model": "realcars:block/fuel_pump",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "realcars:block/fuel_pump",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "realcars:block/fuel_pump",
+      "y": 270
+    }
+  }
+}

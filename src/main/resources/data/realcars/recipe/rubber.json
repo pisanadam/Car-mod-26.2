@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:slime_ball",
+    "minecraft:slime_ball",
+    "minecraft:coal"
+  ],
+  "result": {
+    "id": "realcars:rubber",
+    "count": 3
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=z": {
+      "model": "realcars:block/road_line_yellow"
+    },
+    "axis=x": {
+      "model": "realcars:block/road_line_yellow",
+      "y": 90
+    }
+  }
+}

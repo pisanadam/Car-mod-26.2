@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "S": "realcars:steel_plate"
+  },
+  "pattern": [
+    "SSS",
+    "S_S",
+    "SSS"
+  ],
+  "result": {
+    "id": "realcars:chassis_compact"
+  }
+}

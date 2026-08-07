@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "realcars:glass_panel",
+    "S": "realcars:steel_plate"
+  },
+  "pattern": [
+    "GGG",
+    "GGG",
+    "SSS"
+  ],
+  "result": {
+    "id": "realcars:windshield"
+  }
+}

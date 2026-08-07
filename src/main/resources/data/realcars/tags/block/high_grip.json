@@ -1,0 +1,19 @@
+{
+  "values": [
+    "realcars:asphalt",
+    "realcars:asphalt_slab",
+    "realcars:road_line_white",
+    "realcars:road_line_yellow",
+    "#minecraft:concrete_powder",
+    "minecraft:stone",
+    "minecraft:smooth_stone",
+    "minecraft:stone_bricks",
+    "minecraft:cobblestone",
+    "minecraft:deepslate",
+    "minecraft:polished_andesite",
+    "minecraft:polished_granite",
+    "minecraft:polished_diorite",
+    "minecraft:bricks",
+    "minecraft:packed_ice"
+  ]
+}

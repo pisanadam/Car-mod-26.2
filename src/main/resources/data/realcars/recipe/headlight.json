@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "realcars:glass_panel",
+    "L": "minecraft:glowstone_dust",
+    "S": "realcars:steel_plate"
+  },
+  "pattern": [
+    "_G_",
+    "GLG",
+    "_S_"
+  ],
+  "result": {
+    "id": "realcars:headlight",
+    "count": 2
+  }
+}

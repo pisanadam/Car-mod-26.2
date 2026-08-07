@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "S": "realcars:steel_plate",
+    "I": "minecraft:iron_block",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "_N_",
+    "SIS",
+    "_R_"
+  ],
+  "result": {
+    "id": "realcars:transmission_manual"
+  }
+}

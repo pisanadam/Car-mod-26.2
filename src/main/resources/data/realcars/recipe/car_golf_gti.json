@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "W": "realcars:wheel_sport",
+    "G": "realcars:windshield",
+    "E": "realcars:engine_i4",
+    "C": "realcars:chassis_compact",
+    "T": "realcars:transmission_manual",
+    "S": "realcars:car_seat"
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "id": "realcars:car_golf_gti"
+  }
+}

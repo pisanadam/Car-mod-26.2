@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": "realcars:steel_plate",
+    "C": "minecraft:coal",
+    "B": "minecraft:bucket"
+  },
+  "pattern": [
+    "_S_",
+    "CBC",
+    "_S_"
+  ],
+  "result": {
+    "id": "realcars:fuel_canister"
+  }
+}
