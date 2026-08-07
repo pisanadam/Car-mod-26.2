@@ -5,7 +5,7 @@
     "S": "realcars:steel_plate"
   },
   "pattern": [
-    "_S_",
+    " S ",
     "SSS"
   ],
   "result": {

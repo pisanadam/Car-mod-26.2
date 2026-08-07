@@ -100,21 +100,33 @@ public class CarEntity extends VehicleEntity {
 		super(type, level);
 		this.model = model;
 		this.blocksBuilding = true;
+		// defineSynchedData() üst sınıfın kurucusundan, yani `model` daha
+		// atanmadan çağrılır; bu yüzden modele bağlı varsayılanlar ancak burada
+		// yazılabilir. Kaydedilmiş bir araç yükleniyorsa readAdditionalSaveData
+		// bunları hemen sonra kendi değerleriyle değiştirir.
+		this.applyConfig(CarConfig.factory(model));
 	}
 
 	// ----------------------------------------------------------------------
 	// Durum
 	// ----------------------------------------------------------------------
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>Dikkat: bu metot {@code Entity} kurucusundan, yani {@link #model} alanı
+	 * daha atanmadan çağrılır. Bu yüzden burada yalnızca nötr varsayılanlar
+	 * tanımlanır; modele özgü değerler kurucunun sonunda yazılır.
+	 */
 	@Override
 	protected void defineSynchedData(final SynchedEntityData.Builder entityData) {
 		super.defineSynchedData(entityData);
-		entityData.define(DATA_COLOR, this.model.defaultColor());
-		entityData.define(DATA_WHEEL, this.model.defaultWheel().ordinal());
+		entityData.define(DATA_COLOR, 0xFFFFFF);
+		entityData.define(DATA_WHEEL, WheelType.WHEEL_STREET.ordinal());
 		entityData.define(DATA_SPOILER, SpoilerType.SPOILER_NONE.ordinal());
-		entityData.define(DATA_ENGINE, this.model.defaultEngine().ordinal());
-		entityData.define(DATA_TRANSMISSION, this.model.defaultTransmission().ordinal());
-		entityData.define(DATA_FUEL, (float) this.model.fuelCapacity());
+		entityData.define(DATA_ENGINE, EngineType.ENGINE_I4.ordinal());
+		entityData.define(DATA_TRANSMISSION, TransmissionType.TRANSMISSION_MANUAL.ordinal());
+		entityData.define(DATA_FUEL, 0.0F);
 		entityData.define(DATA_ENGINE_ON, false);
 		entityData.define(DATA_SPEED, 0.0F);
 		entityData.define(DATA_RPM, GearBox.IDLE_RPM);
@@ -232,6 +244,13 @@ public class CarEntity extends VehicleEntity {
 		if (this.isLocalInstanceAuthoritative()) {
 			this.driveTick();
 			this.move(MoverType.SELF, this.getDeltaMovement());
+			this.publishState();
+		} else if (!this.level().isClientSide()) {
+			// Araç sürülürken fiziği sürücünün istemcisi işletir, dolayısıyla
+			// sunucu otoriter değildir. Toz efektleri ve diğer oyuncuların
+			// gördüğü gösterge yine de doğru olsun diye hız, vites ve
+			// direksiyon gerçek hareketten türetilip yayınlanır.
+			this.deriveStateFromMovement();
 			this.publishState();
 		}
 
@@ -382,6 +401,48 @@ public class CarEntity extends VehicleEntity {
 			* Mth.clamp(Math.abs(this.speedKmh) / 12.0F, 0.0F, 1.0F);
 		this.setYRot(this.getYRot() + turn);
 		this.yRotO = this.getYRot() - turn;
+	}
+
+	/**
+	 * Gerçekleşen konum ve yön değişiminden hızı, vitesi ve direksiyon açısını
+	 * geri hesaplar. Fiziği işletmeyen taraf için bir tahmindir, ama gösterge ve
+	 * partikül eşikleri için yeterince doğrudur.
+	 */
+	private void deriveStateFromMovement() {
+		final double dx = this.getX() - this.xo;
+		final double dz = this.getZ() - this.zo;
+		final double travelled = Math.sqrt(dx * dx + dz * dz);
+
+		// İlerleme yönü aracın burnuyla aynı mı, yoksa geri mi gidiyor?
+		final float yawRad = this.getYRot() * Mth.DEG_TO_RAD;
+		final double forwardX = -Mth.sin(yawRad);
+		final double forwardZ = Mth.cos(yawRad);
+		final double alignment = dx * forwardX + dz * forwardZ;
+		final float sign = alignment < 0.0D ? -1.0F : 1.0F;
+
+		this.speedKmh = (float) (travelled / KMH_TO_BLOCKS_PER_TICK) * sign;
+
+		// Hız hangi vitesin bandına düşüyorsa o vites varsayılır.
+		final float topSpeed = this.topSpeedKmh();
+		if (this.speedKmh < -0.5F) {
+			this.gear = GearBox.REVERSE;
+		} else if (this.speedKmh < 0.5F) {
+			this.gear = GearBox.NEUTRAL;
+		} else {
+			this.gear = 1;
+			for (int g = this.gearCount(); g >= 1; g--) {
+				if (this.speedKmh >= GearBox.gearBottomSpeed(g, this.gearCount(), topSpeed)) {
+					this.gear = g;
+					break;
+				}
+			}
+		}
+		this.rpm = GearBox.rpm(this.speedKmh, this.gear, this.gearCount(), topSpeed,
+			this.engineType().redlineRpm());
+
+		// Direksiyon açısı, bu tick'teki dönüş miktarından tahmin edilir.
+		final float turn = Mth.wrapDegrees(this.getYRot() - this.yRotO);
+		this.steerAngle = Mth.clamp(turn / 3.0F, -1.0F, 1.0F);
 	}
 
 	private void publishState() {

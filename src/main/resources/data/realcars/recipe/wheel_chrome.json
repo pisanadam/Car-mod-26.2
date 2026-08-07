@@ -6,9 +6,9 @@
     "Q": "minecraft:quartz"
   },
   "pattern": [
-    "_R_",
+    " R ",
     "RQR",
-    "_R_"
+    " R "
   ],
   "result": {
     "id": "realcars:wheel_chrome",

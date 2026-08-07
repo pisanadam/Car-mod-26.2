@@ -7,9 +7,9 @@
     "B": "minecraft:bucket"
   },
   "pattern": [
-    "_S_",
+    " S ",
     "CBC",
-    "_S_"
+    " S "
   ],
   "result": {
     "id": "realcars:fuel_canister"

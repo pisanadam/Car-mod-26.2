@@ -8,9 +8,9 @@
     "R": "minecraft:redstone"
   },
   "pattern": [
-    "_N_",
+    " N ",
     "SIS",
-    "_R_"
+    " R "
   ],
   "result": {
     "id": "realcars:transmission_manual"

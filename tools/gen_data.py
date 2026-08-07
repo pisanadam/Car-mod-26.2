@@ -34,11 +34,16 @@ def mid(name):
 # ==========================================================================
 
 def shaped(pattern, key, result, count=1, category="misc"):
+    """Şekilli tarif.
+
+    Kalıplarda boş slot okunaklı olsun diye '_' yazılır; Minecraft boş slotu
+    boşluk karakteriyle beklediği için burada çevrilir.
+    """
     return {
         "type": "minecraft:crafting_shaped",
         "category": category,
         "key": key,
-        "pattern": pattern,
+        "pattern": [row.replace("_", " ") for row in pattern],
         "result": {"id": result, **({"count": count} if count != 1 else {})},
     }
 
@@ -309,7 +314,23 @@ def gen_loot_and_tags():
     ]})
     write(DATA / "tags/block/high_grip.json", {"values": [
         mid("asphalt"), mid("asphalt_slab"), mid("road_line_white"), mid("road_line_yellow"),
-        "#minecraft:concrete_powder", "minecraft:stone", "minecraft:smooth_stone",
+        "minecraft:white_concrete",
+        "minecraft:orange_concrete",
+        "minecraft:magenta_concrete",
+        "minecraft:light_blue_concrete",
+        "minecraft:yellow_concrete",
+        "minecraft:lime_concrete",
+        "minecraft:pink_concrete",
+        "minecraft:gray_concrete",
+        "minecraft:light_gray_concrete",
+        "minecraft:cyan_concrete",
+        "minecraft:purple_concrete",
+        "minecraft:blue_concrete",
+        "minecraft:brown_concrete",
+        "minecraft:green_concrete",
+        "minecraft:red_concrete",
+        "minecraft:black_concrete",
+        "minecraft:stone", "minecraft:smooth_stone",
         "minecraft:stone_bricks", "minecraft:cobblestone", "minecraft:deepslate",
         "minecraft:polished_andesite", "minecraft:polished_granite", "minecraft:polished_diorite",
         "minecraft:bricks", "minecraft:packed_ice",

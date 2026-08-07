@@ -8,7 +8,7 @@
     "C": "minecraft:copper_block"
   },
   "pattern": [
-    "P_P",
+    "P P",
     "SIS",
     "SCS"
   ],

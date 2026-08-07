@@ -5,9 +5,9 @@
     "S": "realcars:steel_plate"
   },
   "pattern": [
-    "_SS",
-    "_S_",
-    "S__"
+    " SS",
+    " S ",
+    "S  "
   ],
   "result": {
     "id": "realcars:wrench"

@@ -6,9 +6,9 @@
     "I": "minecraft:iron_ingot"
   },
   "pattern": [
-    "_R_",
+    " R ",
     "RIR",
-    "_R_"
+    " R "
   ],
   "result": {
     "id": "realcars:wheel_street",

@@ -8,9 +8,9 @@
     "C": "minecraft:comparator"
   },
   "pattern": [
-    "_N_",
+    " N ",
     "SIS",
-    "_C_"
+    " C "
   ],
   "result": {
     "id": "realcars:transmission_automatic"

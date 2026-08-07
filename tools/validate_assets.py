@@ -128,6 +128,15 @@ def check_recipes():
             if sig in seen:
                 err(f"tarif çakışması: {p.name} ile {seen[sig]} aynı kalıp ve girdilere sahip")
             seen[sig] = p.name
+            # Minecraft boş slotu yalnızca boşluk karakteriyle kabul eder.
+            for row in obj["pattern"]:
+                for symbol in row:
+                    if symbol != " " and symbol not in obj["key"]:
+                        err(f"{p.name}: kalıptaki '{symbol}' sembolü anahtarda tanımlı değil "
+                            f"(boş slot için boşluk kullanılmalı)")
+            widths = {len(row) for row in obj["pattern"]}
+            if len(widths) > 1:
+                err(f"{p.name}: kalıp satırları eşit uzunlukta değil")
         else:
             refs = list(obj["ingredients"])
         refs.append(obj["result"]["id"])
@@ -140,6 +149,25 @@ def check_recipes():
     for car_id in spec.CARS:
         if not (DATA / f"recipe/{spec.car_item_id(car_id)}.json").exists():
             err(f"araba tarifi eksik: {car_id}")
+
+
+def check_tags():
+    """Etiket dosyalarının başka etiketlere yaptığı atıflar geçerli mi.
+
+    Var olmayan bir vanilla etiketine atıf, etiketin tamamının sessizce
+    yüklenmemesine yol açar; bu yüzden yalnızca bilinen etiketlere izin verilir.
+    """
+    allowed_vanilla_tags = {
+        "#minecraft:planks", "#minecraft:wool", "#minecraft:logs",
+        "#minecraft:stone_bricks", "#minecraft:wooden_slabs",
+    }
+    for p in (DATA / "tags/block").glob("*.json"):
+        obj = load(p) or {}
+        for value in obj.get("values", []):
+            if isinstance(value, str) and value.startswith("#") \
+                    and value not in allowed_vanilla_tags:
+                err(f"tags/block/{p.name}: doğrulanmamış etiket atfı -> {value} "
+                    f"(yoksa etiketin tamamı yüklenmez)")
 
 
 def check_sounds():
@@ -187,6 +215,7 @@ def main():
     check_items()
     check_block_models()
     check_recipes()
+    check_tags()
     check_sounds()
     check_java_enums()
 

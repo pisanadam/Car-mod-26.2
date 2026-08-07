@@ -6,9 +6,9 @@
     "S": "realcars:steel_plate"
   },
   "pattern": [
-    "_R_",
+    " R ",
     "RSR",
-    "_R_"
+    " R "
   ],
   "result": {
     "id": "realcars:wheel_sport",

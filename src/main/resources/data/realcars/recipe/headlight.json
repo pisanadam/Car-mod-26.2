@@ -7,9 +7,9 @@
     "S": "realcars:steel_plate"
   },
   "pattern": [
-    "_G_",
+    " G ",
     "GLG",
-    "_S_"
+    " S "
   ],
   "result": {
     "id": "realcars:headlight",
