@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "realcars",
+	"version": "${version}",
+	"name": "RealCars",
+	"description": "Gerçek hayattaki arabaları Minecraft'a getiren araba modu: motor sesi, km/saat göstergesi, dönen tekerlekler, toz efektleri, parça craftlama ve modifiye sistemi.",
+	"authors": [
+		"pisanadam"
+	],
+	"contact": {
+		"sources": "https://github.com/pisanadam/car-mod-26.2"
+	},
+	"license": "MIT",
+	"icon": "assets/realcars/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.pisanadam.realcars.RealCars"
+		],
+		"client": [
+			"com.pisanadam.realcars.client.RealCarsClient"
+		]
+	},
+	"mixins": [],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
