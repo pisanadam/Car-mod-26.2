@@ -19,29 +19,34 @@ TEX = ROOT / "src/main/resources/assets" / spec.MOD_ID / "textures"
 # ==========================================================================
 # Araç gövde atlası — ATLAS_REGIONS Java tarafındaki CarTexture ile aynıdır
 # ==========================================================================
-# ad -> (u, v, genişlik, yükseklik). Her bölge düzgün desenlidir, bu yüzden
-# bölge içinde texOffs'un tam yeri önemli değildir; sadece kutunun UV ayak izi
-# (2*(w+d)) x (h+d) bölgeye sığmalıdır.
+# ad -> (u, v, genişlik, yükseklik). Her bölge kendi içinde düzgün desenlidir,
+# bu yüzden bölge içinde texOffs'un tam yeri önemli değildir; tek koşul, kutunun
+# UV ayak izinin — yani 2*(w+d) x (h+d) — bölgeye sığmasıdır.
+#
+# Bir araç gövdesi 30 birim geniş ve 80 birim uzun olabildiğinden ayak izi
+# 2*(30+80) = 220 birime çıkar; bu yüzden gövde ve cam bölgeleri 256 birim
+# geniştir ve atlas 512x512'dir.
+ATLAS_SIZE = 512
 ATLAS_REGIONS = {
-    "body":        (0, 0, 192, 128),
-    "glass":       (192, 0, 64, 64),
-    "trim":        (192, 64, 64, 64),
-    "tire":        (0, 128, 64, 64),
-    "rim_street":  (64, 128, 32, 32),
-    "rim_sport":   (96, 128, 32, 32),
-    "rim_offroad": (64, 160, 32, 32),
-    "rim_chrome":  (96, 160, 32, 32),
-    "light_front": (128, 128, 32, 32),
-    "light_rear":  (160, 128, 32, 32),
-    "chrome":      (192, 128, 64, 64),
-    "interior":    (0, 192, 64, 64),
-    "grille":      (64, 192, 64, 64),
-    "under":       (128, 192, 64, 64),
+    "body":        (0, 0, 256, 128),
+    "glass":       (256, 0, 256, 128),
+    "trim":        (0, 128, 256, 128),
+    "interior":    (256, 128, 256, 128),
+    "tire":        (0, 256, 128, 128),
+    "grille":      (128, 256, 128, 128),
+    "under":       (256, 256, 128, 128),
+    "chrome":      (384, 256, 128, 128),
+    "rim_street":  (0, 384, 64, 64),
+    "rim_sport":   (64, 384, 64, 64),
+    "rim_offroad": (128, 384, 64, 64),
+    "rim_chrome":  (192, 384, 64, 64),
+    "light_front": (256, 384, 64, 64),
+    "light_rear":  (320, 384, 64, 64),
 }
 
 
 def gen_car_atlas():
-    c = Canvas(256, 256)
+    c = Canvas(ATLAS_SIZE, ATLAS_SIZE)
 
     # Gövde boyası: neredeyse beyaz, çalışma zamanında araç rengiyle
     # çarpılarak boyanır. Hafif dikey degrade metalik his verir.
@@ -54,22 +59,23 @@ def gen_car_atlas():
     x, y, w, h = ATLAS_REGIONS["glass"]
     c.rect(x, y, w, h, (38, 48, 62))
     c.vshade(x, y, w, h, 34, -10)
-    for i in range(0, w, 9):
+    for i in range(0, w, 18):
         c.line(x + i, y + h - 1, x + i + h, y, (72, 88, 108))
 
     # Siyah plastik trim / tampon
     x, y, w, h = ATLAS_REGIONS["trim"]
     c.rect(x, y, w, h, (30, 32, 36))
     c.noise(x, y, w, h, 5, seed=2)
-    c.scanlines(x, y, w, h, 7, step=4)
+    c.scanlines(x, y, w, h, 7, step=6)
 
     # Lastik: koyu kauçuk + diş deseni
     x, y, w, h = ATLAS_REGIONS["tire"]
     c.rect(x, y, w, h, (26, 26, 28))
     c.noise(x, y, w, h, 4, seed=3)
-    for i in range(0, w, 4):
+    for i in range(0, w, 8):
         c.vline(x + i, y, h, (14, 14, 16))
         c.vline(x + i + 1, y, h, (40, 40, 44))
+        c.vline(x + i + 2, y, h, (34, 34, 38))
 
     # Jantlar
     _rim(c, ATLAS_REGIONS["rim_street"], spec.WHEELS["wheel_street"][4], spokes=8)
@@ -81,13 +87,13 @@ def gen_car_atlas():
     x, y, w, h = ATLAS_REGIONS["light_front"]
     c.rect(x, y, w, h, (246, 244, 210))
     c.vshade(x, y, w, h, 8, -40)
-    for i in range(0, w, 5):
+    for i in range(0, w, 10):
         c.vline(x + i, y, h, (255, 253, 236))
 
     x, y, w, h = ATLAS_REGIONS["light_rear"]
     c.rect(x, y, w, h, (172, 26, 26))
     c.vshade(x, y, w, h, 26, -30)
-    for i in range(0, w, 5):
+    for i in range(0, w, 10):
         c.vline(x + i, y, h, (214, 48, 44))
 
     # Krom
@@ -100,15 +106,15 @@ def gen_car_atlas():
     x, y, w, h = ATLAS_REGIONS["interior"]
     c.rect(x, y, w, h, (48, 42, 40))
     c.noise(x, y, w, h, 6, seed=5)
-    for i in range(0, h, 6):
+    for i in range(0, h, 12):
         c.hline(x, y + i, w, (62, 55, 52))
 
     # Panjur (ön ızgara)
     x, y, w, h = ATLAS_REGIONS["grille"]
     c.rect(x, y, w, h, (22, 24, 27))
-    for i in range(0, h, 3):
+    for i in range(0, h, 6):
         c.hline(x, y + i, w, (58, 62, 68))
-        c.hline(x, y + i + 1, w, (12, 13, 15))
+        c.hline(x, y + i + 2, w, (12, 13, 15))
 
     # Alt gövde / şasi
     x, y, w, h = ATLAS_REGIONS["under"]
@@ -517,17 +523,19 @@ def gen_gui():
     c.outline_rect(0, 16, 64, 12, (96, 102, 112))
     c.save(out / "hud_bars.png")
 
-    # --- modifiye ekranı arka planı (256x256, üstte 248x180 panel) ---
+    # --- modifiye ekranı arka planı ---
+    # Panel 248x225: üstte sekme şeridi, solda 3B önizleme çukuru, sağda
+    # seçenek alanı, altta oyuncu envanteri. Ölçüler CarModificationScreen
+    # içindeki sabitlerle birebir aynıdır.
     c = Canvas(256, 256)
-    _panel(c, 0, 0, 248, 180)
-    # sol: 3B önizleme çukuru
-    _inset(c, 7, 20, 94, 118)
-    # sağ: seçenek listesi çukuru
-    _inset(c, 106, 20, 135, 118)
-    # alt: oyuncu envanteri alanı
+    _panel(c, 0, 0, 248, 225)
+    _inset(c, 7, 20, 94, 118)      # önizleme
+    _inset(c, 106, 20, 135, 118)   # seçenekler
     for row in range(3):
         for col in range(9):
-            _slot(c, 7 + col * 18, 142 + row * 18)
+            _slot(c, 7 + col * 18, 143 + row * 18)
+    for col in range(9):
+        _slot(c, 7 + col * 18, 201)
     c.save(out / "modification.png")
 
     # --- montaj tezgahı ekranı arka planı ---

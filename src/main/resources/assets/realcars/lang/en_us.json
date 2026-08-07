@@ -92,7 +92,7 @@
   "item.realcars.windshield": "Windshield",
   "item.realcars.wrench": "Wrench",
   "itemGroup.realcars.main": "RealCars",
-  "key.realcars.category": "RealCars",
+  "key.category.realcars.controls": "RealCars",
   "key.realcars.engine_toggle": "Start/stop engine",
   "key.realcars.horn": "Horn",
   "key.realcars.shift_down": "Shift down",
