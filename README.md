@@ -180,6 +180,8 @@ parlıyorlar.
   sayı oyundaki gerçek hızdır. Bunun bir sonucu var: 250 km/s saniyede ~69 blok
   demek ve bu, sunucunun chunk yükleme hızını zorlayabilir. Uzun yolculuklarda
   görüş mesafesini artırmak ya da yolu önceden yüklenmiş tutmak yardımcı olur.
+- **Kapı sesi.** Araca binip inerken kapı sesi çalar; sunucudan çalındığı için
+  yanından geçen birinin bindiğini de duyarsın.
 - **Motor sesi devirle değişir.** Ses dosyaları sentezle üretildi; her motor tipi
   kendi ateşleme mertebesini vurguluyor, bu yüzden V8 ile 4 silindir kulakta
   gerçekten farklı duyuluyor.

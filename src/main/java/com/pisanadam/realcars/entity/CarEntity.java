@@ -713,6 +713,31 @@ public class CarEntity extends VehicleEntity {
 		return this.getPassengers().size() < this.maxPassengers();
 	}
 
+	@Override
+	protected void addPassenger(final Entity passenger) {
+		super.addPassenger(passenger);
+		this.playDoorSound(passenger);
+	}
+
+	@Override
+	protected void removePassenger(final Entity passenger) {
+		super.removePassenger(passenger);
+		this.playDoorSound(passenger);
+	}
+
+	/**
+	 * Binip inerken kapı sesi. Sunucudan çalınır ki yalnızca binen değil
+	 * çevredeki oyuncular da duysun; perde biraz rastgeledir, aynı ses üst üste
+	 * duyulduğunda mekanik gelmesin diye.
+	 */
+	private void playDoorSound(final Entity passenger) {
+		if (this.level().isClientSide() || !(passenger instanceof Player)) {
+			return;
+		}
+		this.level().playSound(null, this, ModSounds.DOOR_CLOSE, SoundSource.NEUTRAL,
+			0.8F, 0.95F + this.random.nextFloat() * 0.1F);
+	}
+
 	private int maxPassengers() {
 		return switch (this.model.carClass()) {
 			case SPORT -> 2;

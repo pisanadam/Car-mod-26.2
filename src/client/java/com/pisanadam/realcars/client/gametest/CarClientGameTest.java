@@ -251,6 +251,17 @@ public class CarClientGameTest implements FabricClientGameTest {
 		});
 		context.waitTicks(30);
 		context.takeScreenshot("96-modifiye-ekrani");
+
+		// İniş: kapı sesi hem binerken hem inerken çalınır, iki yol da gerçek
+		// oyunda yürütülsün.
+		context.setScreen(() -> null);
+		server.runOnServer(unused -> singleplayer.getConnection().getServerPlayer().stopRiding());
+		context.waitTicks(10);
+		final boolean dismounted = context.computeOnClient(client ->
+			client.player == null || client.player.getVehicle() == null);
+		if (!dismounted) {
+			throw new AssertionError("Oyuncu araçtan inemedi");
+		}
 	}
 
 	/**
