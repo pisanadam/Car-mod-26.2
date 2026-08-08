@@ -24,9 +24,7 @@ public record CarActionPayload(Action action) implements CustomPacketPayload {
 
 	public enum Action {
 		TOGGLE_ENGINE,
-		HORN,
-		SHIFT_UP,
-		SHIFT_DOWN;
+		HORN;
 
 		private static final Action[] VALUES = values();
 

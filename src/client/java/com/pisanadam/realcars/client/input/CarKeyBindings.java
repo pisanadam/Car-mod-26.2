@@ -25,8 +25,6 @@ public final class CarKeyBindings {
 
 	public static final KeyMapping ENGINE_TOGGLE = register("key.realcars.engine_toggle", GLFW.GLFW_KEY_G);
 	public static final KeyMapping HORN = register("key.realcars.horn", GLFW.GLFW_KEY_H);
-	public static final KeyMapping SHIFT_UP = register("key.realcars.shift_up", GLFW.GLFW_KEY_R);
-	public static final KeyMapping SHIFT_DOWN = register("key.realcars.shift_down", GLFW.GLFW_KEY_F);
 
 	private CarKeyBindings() {
 	}
@@ -54,8 +52,6 @@ public final class CarKeyBindings {
 			// Araçtan inince tuş kuyruğu birikmesin.
 			drain(ENGINE_TOGGLE);
 			drain(HORN);
-			drain(SHIFT_UP);
-			drain(SHIFT_DOWN);
 			return;
 		}
 		if (consume(ENGINE_TOGGLE)) {
@@ -63,12 +59,6 @@ public final class CarKeyBindings {
 		}
 		if (consume(HORN)) {
 			send(CarActionPayload.Action.HORN);
-		}
-		if (consume(SHIFT_UP)) {
-			send(CarActionPayload.Action.SHIFT_UP);
-		}
-		if (consume(SHIFT_DOWN)) {
-			send(CarActionPayload.Action.SHIFT_DOWN);
 		}
 	}
 

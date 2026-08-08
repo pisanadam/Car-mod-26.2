@@ -5,10 +5,9 @@ import net.minecraft.util.Mth;
 /**
  * Vites ve devir hesapları.
  *
- * <p>Her vitesin kapsadığı bir hız bandı vardır; araç o bandın neresindeyse
- * devir de rölanti ile kırmızı bölge arasında oraya düşer. Tork eğrisi orta
- * devirlerde tepe yaptığı için kırmızı bölgede ısrar etmek ivmeyi düşürür —
- * doğru anda vites değiştirmek gerçekten hızlandırır.
+ * <p>Şanzıman her araçta kendi kendine çalışır: her vitesin kapsadığı bir hız
+ * bandı vardır, araç o bandın neresindeyse devir de rölanti ile kırmızı bölge
+ * arasında oraya düşer. Vites elle değiştirilmez; hızdan okunur.
  *
  * <p>Vites 0 boşu, -1 geri vitesi temsil eder.
  */
@@ -59,6 +58,29 @@ public final class GearBox {
 	}
 
 	/**
+	 * Verilen hızda şanzımanın seçeceği vites.
+	 *
+	 * <p>Şanzıman her araçta kendi kendine çalıştığı için vites doğrudan hızdan
+	 * okunur: hız hangi vitesin bandına düşüyorsa o vites takılıdır. Bantlar
+	 * birbirine bindiği ve en yüksek uygun vites seçildiği için hız arttıkça
+	 * vites de tek yönde artar, ileri geri titremez.
+	 */
+	public static int gearFor(final float speedKmh, final int gearCount, final float topSpeedKmh) {
+		if (speedKmh < -0.5F) {
+			return REVERSE;
+		}
+		if (speedKmh < 0.5F) {
+			return NEUTRAL;
+		}
+		for (int gear = gearCount; gear >= 1; gear--) {
+			if (speedKmh >= gearBottomSpeed(gear, gearCount, topSpeedKmh)) {
+				return gear;
+			}
+		}
+		return 1;
+	}
+
+	/**
 	 * Motorun o devirdeki bağıl torku (0.35 - 1.0). Tepe nokta kırmızı bölgenin
 	 * biraz altındadır; hem çok düşük hem çok yüksek devirde güç düşer.
 	 */
@@ -99,32 +121,4 @@ public final class GearBox {
 		return (float) (sum / gearCount);
 	}
 
-	/** Otomatik şanzımanın bu devirde seçeceği vites. */
-	public static int autoShift(final int currentGear, final int rpm, final int gearCount,
-								final int redlineRpm, final boolean throttle) {
-		if (currentGear <= NEUTRAL) {
-			return currentGear;
-		}
-		if (throttle && rpm > redlineRpm * 0.90F && currentGear < gearCount) {
-			return currentGear + 1;
-		}
-		if (rpm < redlineRpm * 0.32F && currentGear > 1) {
-			return currentGear - 1;
-		}
-		return currentGear;
-	}
-
-	/**
-	 * Manuel şanzımanda yanlış vitesin cezası: devir bandın çok dışındaysa
-	 * motor boğulur ve çekiş düşer.
-	 */
-	public static float mismatchPenalty(final int rpm, final int redlineRpm) {
-		if (rpm < IDLE_RPM * 1.4F) {
-			return 0.45F;
-		}
-		if (rpm > redlineRpm) {
-			return 0.30F;
-		}
-		return 1.0F;
-	}
 }

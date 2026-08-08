@@ -44,7 +44,7 @@ import org.jspecify.annotations.Nullable;
  * doğru olan tarafta) işletilir; bu vanilla'nın tekne/at davranışıyla aynıdır ve
  * direksiyonun gecikmesiz hissedilmesini sağlar. Sunucu, sürücünün girdisini
  * {@link ServerPlayer#getLastClientInput()} üzerinden okuyabildiği için hareket
- * için ayrı bir paket gerekmez; yalnızca motor/korna/vites gibi anlık eylemler
+ * için ayrı bir paket gerekmez; yalnızca motor ve korna gibi anlık eylemler
  * küçük bir paketle bildirilir.
  *
  * <p>Hız gerçek ölçekte tutulur: 1 blok = 1 metre kabul edildiğinden
@@ -55,6 +55,10 @@ public class CarEntity extends VehicleEntity {
 	public static final double KMH_TO_BLOCKS_PER_TICK = 1.0 / 72.0;
 	/** Blokların içinden geçmeyi önlemek için tek tickte alınabilecek azami yol. */
 	private static final double MAX_BLOCKS_PER_TICK = 4.5;
+	/** Tam tutuşta fren gücü (km/s, tick başına). */
+	private static final float BRAKE_RATE = 2.6F;
+	/** Geri viteste çekişin ileriye oranı. */
+	private static final float REVERSE_POWER = 0.55F;
 
 	private static final EntityDataAccessor<Integer> DATA_COLOR =
 		SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.INT);
@@ -91,7 +95,6 @@ public class CarEntity extends VehicleEntity {
 	/** Tekerleklerin toplam dönme açısı (derece) — render bunu kullanır. */
 	private float wheelAngle;
 	private float wheelAngleO;
-	private int shiftCooldown;
 	private boolean wheelSlip;
 	/** Süspansiyon hareketini besleyen yükler — her iki tarafta da hesaplanır. */
 	private float prevSpeedKmh;
@@ -238,16 +241,16 @@ public class CarEntity extends VehicleEntity {
 		if (this.getDamage() > 0.0F) {
 			this.setDamage(this.getDamage() - 1.0F);
 		}
-		if (this.shiftCooldown > 0) {
-			this.shiftCooldown--;
-		}
 
 		super.tick();
 		this.interpolation.interpolate();
 
 		if (this.isLocalInstanceAuthoritative()) {
 			this.driveTick();
+			final double beforeX = this.getX();
+			final double beforeZ = this.getZ();
 			this.move(MoverType.SELF, this.getDeltaMovement());
+			this.clampSpeedToActualTravel(beforeX, beforeZ);
 			this.publishState();
 		} else if (!this.level().isClientSide()) {
 			// Araç sürülürken fiziği sürücünün istemcisi işletir, dolayısıyla
@@ -295,12 +298,23 @@ public class CarEntity extends VehicleEntity {
 		return this.longAccel < -0.35F && Math.abs(this.speedKmh()) > 1.0F;
 	}
 
-	/** Bir tick'lik sürüş simülasyonu: girdi, vites, çekiş, direksiyon, yakıt. */
+	/**
+	 * Bir tick'lik sürüş simülasyonu.
+	 *
+	 * <p>Yön doğrudan tuşlardan gelir: ileri tuşu ileri, geri tuşu geri sürer.
+	 * Gidilen yönün tersine basılırsa araç önce frenler, durunca ters yöne
+	 * kalkar — yani ayrı bir fren tuşu ya da vites seçimi gerekmez. Şanzıman
+	 * her araçta kendi kendine çalışır; vites yalnızca hıza bakılarak
+	 * belirlenir ve göstergeyle motor sesini besler.
+	 */
 	private void driveTick() {
 		final Input input = this.driverInput();
-		final boolean throttle = input.forward();
-		final boolean brakeOrReverse = input.backward();
-		final boolean handbrake = input.shift();
+		// El freni sıçrama tuşundadır (varsayılan boşluk). Eğilme tuşu
+		// kullanılamaz: vanilla Player#rideTick o tuşa basılınca oyuncuyu
+		// araçtan indirir, yani el freni aynı anda insen olurdu.
+		final boolean handbrake = input.jump();
+		// İleri +1, geri -1; ikisi de basılıysa ya da hiçbiri basılı değilse 0.
+		final int demand = (input.forward() ? 1 : 0) - (input.backward() ? 1 : 0);
 
 		final float grip = this.groundGrip();
 		final boolean airborne = !this.onGround();
@@ -311,47 +325,43 @@ public class CarEntity extends VehicleEntity {
 		}
 		final boolean running = this.engineOn() && this.fuel() > 0.0F;
 
-		// --- vites seçimi ---
-		this.updateGear(throttle, brakeOrReverse, running);
-
-		// --- boyuna kuvvetler ---
+		// --- vites ve devir ---
 		final float topSpeed = this.topSpeedKmh();
+		this.gear = GearBox.gearFor(this.speedKmh, this.gearCount(), topSpeed);
+		// Duran araçta vites boştadır ve boşta çekiş sıfırdır; sürücü hareket
+		// istiyorsa kalkış vitesi devreye girer, yoksa araç hiç kalkamazdı.
+		if (this.gear == GearBox.NEUTRAL && demand != 0) {
+			this.gear = demand < 0 ? GearBox.REVERSE : 1;
+		}
 		this.rpm = GearBox.rpm(this.speedKmh, this.gear, this.gearCount(), topSpeed,
 			this.engineType().redlineRpm());
 
+		// --- boyuna kuvvetler ---
+		final float baseAccel = 100.0F / (this.model.accelSeconds() * 20.0F);
+		// Tutuş sınırı aracın kendi ivmesine göre ölçeklenir: asfaltta uygun
+		// lastikle tavan ivmenin üstünde kalır, toprakta ve buzda altına iner.
+		final float maxTraction = baseAccel * (0.55F + 0.75F * grip);
+
 		float accel = 0.0F;
-		if (running && !airborne) {
-			// 0-100 süresinden türetilen temel ivme (km/s / tick)
-			final float baseAccel = 100.0F / (this.model.accelSeconds() * 20.0F);
+		if (demand * this.speedKmh < -0.5F) {
+			// Gidilen yönün tersine basılı: fren. Sıfırı geçip aniden ters
+			// yöne fırlamasın diye durakta sabitlenir.
+			final float braking = BRAKE_RATE * grip;
+			this.speedKmh = Math.abs(this.speedKmh) <= braking
+				? 0.0F : this.speedKmh - Math.signum(this.speedKmh) * braking;
+		} else if (running && !airborne && demand != 0) {
 			final float power = GearBox.torqueFactor(this.rpm, this.engineType().redlineRpm())
 				* GearBox.pullFactor(this.gear, this.gearCount())
 				* this.engineType().powerFactor() / this.model.defaultEngine().powerFactor();
-			final float penalty = this.transmissionType().automatic()
-				? 1.0F : GearBox.mismatchPenalty(this.rpm, this.engineType().redlineRpm());
-
-			if (throttle && this.gear > GearBox.NEUTRAL) {
-				accel = baseAccel * power * penalty;
-			} else if (brakeOrReverse && this.gear == GearBox.REVERSE) {
-				accel = -baseAccel * 0.6F * power;
-			}
+			// Geri viteste çekiş daha düşüktür.
+			accel = baseAccel * power * demand * (demand < 0 ? REVERSE_POWER : 1.0F);
 		}
 
-		// Tutuş, aktarılabilecek kuvveti sınırlar; fazlası patinaja gider. Sınır
-		// aracın kendi ivmesine göre ölçeklenir: asfaltta uygun lastikle
-		// (grip ~1) tavan ivmenin üstünde kalır, yani araç kataloğundaki 0-100
-		// süresini gerçekten tutturur. Toprakta ve buzda ise sınır ivmenin
-		// altına düşer ve tekerlek boşa döner.
-		final float baseAccelFor = 100.0F / (this.model.accelSeconds() * 20.0F);
-		final float maxTraction = baseAccelFor * (0.55F + 0.75F * grip);
 		this.wheelSlip = Math.abs(accel) > maxTraction && Math.abs(this.speedKmh) < topSpeed * 0.5F;
 		accel = Mth.clamp(accel, -maxTraction, maxTraction);
 
-		// --- frenleme ve sürtünme ---
-		if (brakeOrReverse && this.gear > GearBox.NEUTRAL && this.speedKmh > 0.5F) {
-			this.speedKmh -= 2.4F * grip;
-		}
 		if (handbrake) {
-			this.speedKmh *= 0.88F;
+			this.speedKmh *= 0.86F;
 		}
 		this.speedKmh += accel;
 
@@ -359,7 +369,7 @@ public class CarEntity extends VehicleEntity {
 		final float rolling = airborne ? 0.02F : 0.06F;
 		final float drag = 0.000045F * this.speedKmh * this.speedKmh * Math.signum(this.speedKmh);
 		this.speedKmh -= Math.signum(this.speedKmh) * rolling + drag;
-		if (Math.abs(this.speedKmh) < 0.25F && !throttle && !brakeOrReverse) {
+		if (Math.abs(this.speedKmh) < 0.25F && demand == 0) {
 			this.speedKmh = 0.0F;
 		}
 		this.speedKmh = Mth.clamp(this.speedKmh, -GearBox.REVERSE_TOP_SPEED, topSpeed);
@@ -380,46 +390,27 @@ public class CarEntity extends VehicleEntity {
 
 		// --- yakıt tüketimi ---
 		if (running) {
-			final float load = throttle ? 1.0F : 0.25F;
+			final float load = demand > 0 ? 1.0F : 0.25F;
 			final float burn = (0.00016F + 0.00060F * (this.rpm / (float) this.engineType().redlineRpm()))
 				* load * this.model.massFactor();
 			this.setFuel(this.fuel() - burn);
 		}
 	}
 
-	private void updateGear(final boolean throttle, final boolean backward, final boolean running) {
-		if (!running) {
-			return;
+	/**
+	 * Hızı, tick içinde <em>gerçekten</em> alınan yola göre düzeltir.
+	 *
+	 * <p>Araç bir engele sürtüyorsa istenen hız uygulanamaz. Bu düzeltme
+	 * olmadan gösterge aracın hiç ulaşmadığı bir hızı yazar: duvara dayanmış
+	 * araç 90 km/s gösterir.
+	 */
+	private void clampSpeedToActualTravel(final double beforeX, final double beforeZ) {
+		final double dx = this.getX() - beforeX;
+		final double dz = this.getZ() - beforeZ;
+		final float actual = (float) (Math.sqrt(dx * dx + dz * dz) / KMH_TO_BLOCKS_PER_TICK);
+		if (actual < Math.abs(this.speedKmh)) {
+			this.speedKmh = Math.signum(this.speedKmh) * actual;
 		}
-		if (this.speedKmh <= 0.2F && backward && this.gear >= GearBox.NEUTRAL) {
-			this.gear = GearBox.REVERSE;
-		} else if (this.gear == GearBox.REVERSE && throttle && this.speedKmh >= -0.2F) {
-			this.gear = 1;
-		} else if (this.gear == GearBox.NEUTRAL && throttle) {
-			this.gear = 1;
-		}
-
-		if (this.transmissionType().automatic() && this.gear > GearBox.NEUTRAL) {
-			final int next = GearBox.autoShift(this.gear, this.rpm, this.gearCount(),
-				this.engineType().redlineRpm(), throttle);
-			if (next != this.gear && this.shiftCooldown == 0) {
-				this.gear = next;
-				this.shiftCooldown = (int) (10 / this.transmissionType().shiftFactor());
-			}
-		}
-	}
-
-	/** Oyuncunun elle vites değiştirmesi (manuel şanzıman). */
-	public void shift(final int delta) {
-		if (this.transmissionType().automatic() || this.shiftCooldown > 0) {
-			return;
-		}
-		final int next = Mth.clamp(this.gear + delta, GearBox.REVERSE, this.gearCount());
-		if (next == GearBox.REVERSE && this.speedKmh > 1.0F) {
-			return;
-		}
-		this.gear = next;
-		this.shiftCooldown = (int) (6 / this.transmissionType().shiftFactor());
 	}
 
 	private void updateSteering(final Input input, final float grip) {
@@ -467,21 +458,8 @@ public class CarEntity extends VehicleEntity {
 
 		this.speedKmh = (float) (travelled / KMH_TO_BLOCKS_PER_TICK) * sign;
 
-		// Hız hangi vitesin bandına düşüyorsa o vites varsayılır.
 		final float topSpeed = this.topSpeedKmh();
-		if (this.speedKmh < -0.5F) {
-			this.gear = GearBox.REVERSE;
-		} else if (this.speedKmh < 0.5F) {
-			this.gear = GearBox.NEUTRAL;
-		} else {
-			this.gear = 1;
-			for (int g = this.gearCount(); g >= 1; g--) {
-				if (this.speedKmh >= GearBox.gearBottomSpeed(g, this.gearCount(), topSpeed)) {
-					this.gear = g;
-					break;
-				}
-			}
-		}
+		this.gear = GearBox.gearFor(this.speedKmh, this.gearCount(), topSpeed);
 		this.rpm = GearBox.rpm(this.speedKmh, this.gear, this.gearCount(), topSpeed,
 			this.engineType().redlineRpm());
 

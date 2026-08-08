@@ -4,6 +4,7 @@ import com.pisanadam.realcars.RealCars;
 import com.pisanadam.realcars.client.hud.SpeedometerHud;
 import com.pisanadam.realcars.client.input.CarInputHandler;
 import com.pisanadam.realcars.client.input.CarKeyBindings;
+import com.pisanadam.realcars.client.input.CarRideHandler;
 import com.pisanadam.realcars.client.render.CarEntityRenderer;
 import com.pisanadam.realcars.client.render.CarMeshFactory;
 import com.pisanadam.realcars.client.screen.CarModificationScreen;
@@ -44,6 +45,7 @@ public class RealCarsClient implements ClientModInitializer {
 		ClientTickEvents.START_CLIENT_TICK.register(CarInputHandler::tick);
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			CarKeyBindings.tick(client);
+			CarRideHandler.tick(client);
 			CarSoundManager.tick(client);
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> CarSoundManager.clear());

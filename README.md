@@ -60,6 +60,8 @@ tekerlek | koltuk  | tekerlek
 
 Hangi arabanın çıkacağını **şasi + motor + şanzıman + tekerlek** bileşimi
 belirler. Örneğin spor şasi + V8 + manuel + spor tekerlek = **Ford Mustang GT**.
+Şanzıman tipi hangi arabanın çıkacağını ve vites sayısını belirler; sürerken
+hepsi kendi kendine vites değiştirir.
 
 ### 3. Sür
 
@@ -67,16 +69,31 @@ Arabayı yere koy (bir bloğun üstüne sağ tıkla), üzerine sağ tıklayarak 
 
 | Tuş | İşlev |
 |---|---|
-| `W` / `S` | Gaz / fren — dururken `S` geri vitese alır |
+| `G` | **Motoru çalıştır / durdur — bunsuz araba hareket etmez** |
+| `W` | İleri |
+| `S` | Geri (ileri giderken basarsan önce fren yapar) |
 | `A` / `D` | Direksiyon |
-| `Shift` | El freni |
-| `G` | Motoru çalıştır / durdur |
+| `Boşluk` | El freni |
 | `H` | Korna |
-| `R` / `F` | Vites yükselt / düşür (manuel şanzımanda) |
+| `Shift` | Araçtan in |
 
-Tuşlar oyun ayarlarından **RealCars** başlığı altında değiştirilebilir.
+Tuşlar oyun ayarlarından **RealCars** başlığı altında değiştirilebilir. Araca
+bindiğinde bu liste sohbete de yazılır — hem de senin gerçekten atadığın
+tuşlarla.
 
-**Önce motoru çalıştırmayı unutma** (`G`) — yoksa araba hareket etmez.
+**Vites yok.** Bütün araçlarda şanzıman kendi kendine çalışır: `W` ileri, `S`
+geri, o kadar. Göstergedeki vites numarası sadece bilgi içindir.
+
+**El freni neden boşlukta?** Eğilme tuşu Minecraft'ta araçtan indirir; el
+freni oraya bağlansaydı fren yapmakla inmek aynı tuş olurdu.
+
+Araca binince kamera kendiliğinden üçüncü şahsa geçer ve araçtayken birinci
+şahsa düşmez — hem aracı hem yolu görürsün. İndiğinde eski görünümüne dönersin.
+Binen oyuncunun modeli çizilmez, yalnızca isim etiketi kalır: yani arabada kim
+olduğu görünür ama içine tıkışmış bir oyuncu görünmez.
+
+**İki kişi binebilir** (bazı araçlarda dört). Aracı ilk binen sürer; sonradan
+binenin tuşları direksiyona karışmaz.
 
 ### 4. Modifiye et
 
@@ -185,9 +202,13 @@ parlıyorlar.
 - **Motor sesi devirle değişir.** Ses dosyaları sentezle üretildi; her motor tipi
   kendi ateşleme mertebesini vurguluyor, bu yüzden V8 ile 4 silindir kulakta
   gerçekten farklı duyuluyor.
-- **Yanlış vites cezalandırır.** Manuel şanzımanda çok düşük ya da kırmızı bölge
-  üstü devirde çekiş düşer; doğru anda vites değiştirmek gerçekten hızlandırır.
-  Otomatik şanzıman bunu senin yerine yapar ama biraz güç kaybettirir.
+- **Gösterge yalan söylemez.** Hız, tick içinde gerçekten alınan yola göre
+  düzeltilir. Duvara dayanmış araç sıfır gösterir, çamurda patinaj yaparken de
+  gerçekte ne kadar ilerliyorsan onu.
+- **Çarpışma kutusu aracın genişliği kadardır**, uzunluğu kadar değil.
+  Minecraft'ta çarpışma kutusu yatayda karedir; 5 metrelik bir araba için 3
+  bloklık bir kare demek yolun kenarına sürekli sürtmek demekti. Karşılığında
+  araç uzunlamasına bloklara biraz girer.
 - **Fren gerçekten zemine bağlı.** `S` frendir, `Shift` el freni. Fren gücü
   zemin tutuşuyla çarpılır, yani asfaltta kısa, toprakta uzun mesafede
   durursun. Sert frende stop lambaları yanar, lastikler gıcırdar ve gövdenin

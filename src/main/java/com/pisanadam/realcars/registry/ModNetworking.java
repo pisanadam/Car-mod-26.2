@@ -24,8 +24,6 @@ public final class ModNetworking {
 			switch (payload.action()) {
 				case TOGGLE_ENGINE -> car.setEngineOn(!car.engineOn());
 				case HORN -> car.honk();
-				case SHIFT_UP -> car.shift(1);
-				case SHIFT_DOWN -> car.shift(-1);
 			}
 		});
 	}

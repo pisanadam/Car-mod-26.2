@@ -20,8 +20,11 @@ public final class CarInputHandler {
 		if (client.player == null) {
 			return;
 		}
-		if (client.player.getVehicle() instanceof CarEntity car) {
-			// Ekran açıkken (örneğin modifiye menüsü) gaz basılı kalmasın.
+		if (client.player.getVehicle() instanceof CarEntity car
+			&& car.getControllingPassenger() == client.player) {
+			// Aracı yalnızca ilk binen sürer; yolcunun tuşları direksiyona
+			// karışmamalı. Ayrıca ekran açıkken (örneğin modifiye menüsü) gaz
+			// basılı kalmasın.
 			final Input input = client.gui.screen() == null ? client.player.input.keyPresses : Input.EMPTY;
 			car.setClientInput(input);
 		}

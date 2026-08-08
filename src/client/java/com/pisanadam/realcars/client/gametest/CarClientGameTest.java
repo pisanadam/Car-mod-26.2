@@ -153,96 +153,47 @@ public class CarClientGameTest implements FabricClientGameTest {
 		context.waitTicks(10);
 	}
 
-	/** Araca binip hız göstergesini, süspansiyonu ve modifiye ekranını fotoğraflar. */
+	/** Araca binip sürüşü, göstergeyi, süspansiyonu ve modifiye ekranını sınar. */
 	private static void rideAndScreenshot(final ClientGameTestContext context,
 										  final TestSingleplayerContext singleplayer) {
 		final var server = singleplayer.getServer();
 		server.runCommand("kill @e[type=!player]");
-		// Hızlanmaya yer açan bir pist. Otomatik şanzımanlı bir araç seçildi:
-		// manuelde vites elle yükseltilmediği için araç birinci vitesde takılı
-		// kalır ve süspansiyon hareketini gösterecek hıza çıkamaz.
-		server.runCommand("forceload add -96 -16 32 16");
-		server.runCommand("fill -96 " + (GROUND_Y - 1) + " -8 32 " + (GROUND_Y - 1)
+		// Hızlanmaya yer açan uzun bir pist.
+		server.runCommand("forceload add -96 -16 96 16");
+		server.runCommand("fill -96 " + (GROUND_Y - 1) + " -8 96 " + (GROUND_Y - 1)
 			+ " 8 realcars:asphalt");
-		server.runCommand("fill -96 " + GROUND_Y + " -8 32 " + (GROUND_Y + 6) + " 8 air");
-		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_DEFENDER, -60.0D, 0.0D, -90.0F));
+		server.runCommand("fill -96 " + GROUND_Y + " -8 96 " + (GROUND_Y + 6) + " 8 air");
+		// Elle vites değiştirmenin kalkmış olması burada sınanır: bu araç
+		// manuel şanzımanla geliyordu ve eskiden birinci vitesde takılı kalırdı.
+		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_BMW_M3, -88.0D, 0.0D, -90.0F));
 		context.waitTicks(6);
 
-		mountByRightClick(context, singleplayer);
+		mountByRightClick(context, singleplayer, -88);
+		checkCameraLockedToThirdPerson(context);
 
 		// Motoru da oyuncunun bastığı tuşla çalıştır; sunucudan doğrudan
 		// setEngineOn çağırmak tuş yolunu sınamadan bırakırdı.
 		context.getInput().pressKey(CarKeyBindings.ENGINE_TOGGLE);
 		context.waitTicks(10);
-		final boolean running = load(context, car -> car.engineOn() ? 1.0F : 0.0F) > 0.5F;
-		if (!running) {
-			throw new AssertionError("G tuşuyla motor çalışmadı");
+		if (load(context, car -> car.engineOn() ? 1.0F : 0.0F) < 0.5F) {
+			throw new AssertionError("Motor tuşuyla motor çalışmadı");
 		}
-		context.waitTicks(20);
+		context.waitTicks(15);
 		context.takeScreenshot("92-gosterge");
 
-		// Süspansiyonu görmek için kamerayı arkaya al: birinci şahısta gövde
-		// zaten görünmez.
-		context.runOnClient(client -> client.options.setCameraType(CameraType.THIRD_PERSON_BACK));
-		context.waitTicks(5);
-
-		// Gaza bas: araç gerçekten hızlanıyor mu, gösterge ibresi kalkıyor mu?
-		context.getInput().holdKey(options -> options.keyUp);
-		final StringBuilder trace = new StringBuilder();
-		for (int i = 0; i < 5; i++) {
-			context.waitTicks(20);
-			trace.append(String.format(" %.0fkm/s(v%d @%drpm)",
-				load(context, CarEntity::speedKmh),
-				(int) load(context, car -> (float) car.gear()),
-				(int) load(context, car -> (float) car.rpm())));
-		}
-		System.out.println("[RealCars] hızlanma izi:" + trace);
-		final float speed = Math.abs(load(context, CarEntity::speedKmh));
+		checkReverse(context);
+		final float speed = accelerate(context);
 		context.takeScreenshot("93-surus");
-
-		// Tekerlek gerçekten dönüyor mu? Açı, kat edilen yolun tekerlek
-		// çevresine bölümü kadar ilerlemeli — yani patinaj yokken lastik
-		// yolda kaymadan yuvarlanmalı.
 		checkWheelsRoll(context);
+		checkSuspension(context);
+		checkGaugeStopsAtWall(context, singleplayer);
 
-		// Direksiyon kırılıyken gövde yana yatıyor mu?
-		context.getInput().holdKey(options -> options.keyLeft);
-		context.waitTicks(14);
-		context.takeScreenshot("94-virajda-yatma");
-		final float roll = load(context, CarEntity::lateralLoad);
-		context.getInput().releaseKey(options -> options.keyLeft);
-		context.getInput().releaseKey(options -> options.keyUp);
-
-		// Sert fren: burun dalıyor, stop lambaları yanıyor, gıcırtı duyuluyor mu?
-		final int squealsBefore = context.computeOnClient(client -> CarSoundManager.brakeSoundCount());
-		context.getInput().holdKey(options -> options.keyDown);
-		context.waitTicks(4);
-		context.takeScreenshot("95-frende-burun-dalmasi");
-		final float dive = load(context, CarEntity::longitudinalLoad);
-		final boolean braking = load(context, car -> car.braking() ? 1.0F : 0.0F) > 0.5F;
-		context.waitTicks(20);
-		final int squeals = context.computeOnClient(client -> CarSoundManager.brakeSoundCount())
-			- squealsBefore;
-		context.getInput().releaseKey(options -> options.keyDown);
-		context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
-
-		// Ekran görüntüsü gözle bakmak için; asıl doğrulama sayılarla yapılır,
-		// çünkü "gövde yattı mı" sorusu piksellerden güvenilir okunmaz.
-		if (speed < 40.0F) {
-			throw new AssertionError("Otomatik şanzımanlı araç 5 saniyede yeterince "
+		if (speed < 60.0F) {
+			throw new AssertionError("Otomatik şanzımanla araç 4 saniyede yeterince "
 				+ "hızlanmadı: " + speed + " km/s");
 		}
-		if (Math.abs(roll) < 0.05F) {
-			throw new AssertionError("Virajda gövdeye yanal yük binmedi: " + roll);
-		}
-		if (dive > -0.05F || !braking) {
-			throw new AssertionError("Frende burun dalmadı: " + dive + ", fren=" + braking);
-		}
-		if (squeals == 0) {
-			throw new AssertionError("Fren sesi hiç çalınmadı");
-		}
-		System.out.println("[RealCars] frende " + squeals + " kez gıcırtı çalındı");
-		context.waitTicks(40);
+
+		checkSecondPassenger(context, singleplayer);
 
 		// Modifiye ekranı
 		server.runOnServer(unused -> {
@@ -255,15 +206,195 @@ public class CarClientGameTest implements FabricClientGameTest {
 		context.takeScreenshot("96-modifiye-ekrani");
 
 		// İniş: kapı sesi hem binerken hem inerken çalınır, iki yol da gerçek
-		// oyunda yürütülsün.
+		// oyunda yürütülsün. Kamera da binmeden önceki hâline dönmeli.
 		context.setScreen(() -> null);
 		server.runOnServer(unused -> singleplayer.getConnection().getServerPlayer().stopRiding());
 		context.waitTicks(10);
-		final boolean dismounted = context.computeOnClient(client ->
-			client.player == null || client.player.getVehicle() == null);
-		if (!dismounted) {
+		if (!context.computeOnClient(client ->
+			client.player == null || client.player.getVehicle() == null)) {
 			throw new AssertionError("Oyuncu araçtan inemedi");
 		}
+		if (context.computeOnClient(client -> client.options.getCameraType()) != CameraType.FIRST_PERSON) {
+			throw new AssertionError("İnince kamera eski hâline dönmedi");
+		}
+	}
+
+	/**
+	 * Araca binince kameranın üçüncü şahsa geçtiğini ve araçtayken birinci
+	 * şahsa düşürülemediğini sınar.
+	 */
+	private static void checkCameraLockedToThirdPerson(final ClientGameTestContext context) {
+		if (context.computeOnClient(client -> client.options.getCameraType()) != CameraType.THIRD_PERSON_BACK) {
+			throw new AssertionError("Araca binince kamera üçüncü şahsa geçmedi");
+		}
+		context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
+		context.waitTicks(3);
+		if (context.computeOnClient(client -> client.options.getCameraType()) == CameraType.FIRST_PERSON) {
+			throw new AssertionError("Araçtayken birinci şahsa geçilebiliyor");
+		}
+	}
+
+	/** Geri tuşunun dururken aracı gerçekten geri götürdüğünü sınar. */
+	private static void checkReverse(final ClientGameTestContext context) {
+		context.getInput().holdKey(options -> options.keyDown);
+		context.waitTicks(25);
+		final float reverse = load(context, CarEntity::speedKmh);
+		context.getInput().releaseKey(options -> options.keyDown);
+		context.waitTicks(20);
+		if (reverse > -2.0F) {
+			throw new AssertionError("Geri tuşuna basılınca araç geri gitmedi: " + reverse + " km/s");
+		}
+	}
+
+	/** Gaza basıp hızlanma izini yazar ve ulaşılan hızı döndürür. */
+	private static float accelerate(final ClientGameTestContext context) {
+		context.getInput().holdKey(options -> options.keyUp);
+		final StringBuilder trace = new StringBuilder();
+		for (int i = 0; i < 4; i++) {
+			context.waitTicks(20);
+			trace.append(String.format(" %.0fkm/s(v%d)",
+				load(context, CarEntity::speedKmh),
+				(int) load(context, car -> (float) car.gear())));
+		}
+		System.out.println("[RealCars] hızlanma izi:" + trace);
+		return Math.abs(load(context, CarEntity::speedKmh));
+	}
+
+	/**
+	 * Göstergenin, aracın gerçekten gitmediği bir hızı yazmadığını sınar.
+	 *
+	 * <p>Aracın önüne duvar örülür ve gaz basılı tutulur. Araç duvara dayanıp
+	 * ilerleyemediğine göre gösterge de sıfıra yakın olmalıdır; eskiden
+	 * istenen hızı yazdığı için duvara dayalı araç doksan km/s gösteriyordu.
+	 */
+	private static void checkGaugeStopsAtWall(final ClientGameTestContext context,
+											  final TestSingleplayerContext singleplayer) {
+		// Önce el freniyle durulur. Hızlı giden araca duvar örmek yarış durumu
+		// yaratır: duvar örülene kadar araç oradan çoktan geçmiş olur.
+		context.getInput().releaseKey(options -> options.keyUp);
+		context.getInput().holdKey(options -> options.keyJump);
+		context.waitTicks(45);
+		context.getInput().releaseKey(options -> options.keyJump);
+		context.waitTicks(10);
+
+		// Viraj testinden sonra araç dümdüz gitmiyor olabilir; duvarı önüne
+		// örebilmek için burnu tekrar +X yönüne çevrilir. Yön istemcide
+		// belirlendiği için düzeltme de istemcide yapılmalı.
+		context.runOnClient(client -> {
+			if (client.player != null && client.player.getVehicle() instanceof CarEntity car) {
+				car.setYRot(-90.0F);
+				car.setYHeadRot(-90.0F);
+			}
+		});
+		context.waitTicks(5);
+
+		final int wallX = Math.round(load(context, car -> (float) car.getX())) + 8;
+		final int wallZ = Math.round(load(context, car -> (float) car.getZ()));
+		singleplayer.getServer().runCommand("fill " + wallX + " " + GROUND_Y + " " + (wallZ - 10)
+			+ " " + (wallX + 2) + " " + (GROUND_Y + 4) + " " + (wallZ + 10) + " stone");
+		context.waitTicks(5);
+
+		// Duvar gerçekten örüldü mü? Örülmediyse testin geri kalanı yanıltıcı olur.
+		final boolean wallBuilt = singleplayer.getServer().computeOnServer(server ->
+			!singleplayer.getConnection().getServerLevel()
+				.getBlockState(new BlockPos(wallX, GROUND_Y + 1, wallZ)).isAir());
+		if (!wallBuilt) {
+			throw new AssertionError("Duvar örülemedi: " + wallX + "," + wallZ);
+		}
+
+		// Sekiz blokluk mesafeyi kapatıp duvara dayanana kadar gaz basılı.
+		context.getInput().holdKey(options -> options.keyUp);
+		context.waitTicks(60);
+		final float travelled = travelInTicks(context, 20);
+		final float gauge = Math.abs(load(context, CarEntity::speedKmh));
+		context.getInput().releaseKey(options -> options.keyUp);
+		System.out.printf("[RealCars] duvara dayalı araç: gösterge %.1f km/s, "
+			+ "20 tickte gidilen %.2f blok%n", gauge, travelled);
+
+		if (travelled > 0.8F) {
+			throw new AssertionError("Araç duvarda durmadı: " + travelled + " blok");
+		}
+		if (gauge > 8.0F) {
+			throw new AssertionError("Araç duvara dayalıyken gösterge " + gauge
+				+ " km/s yazıyor — gitmediği bir hızı gösteriyor");
+		}
+	}
+
+	/** Verilen tick sayısında aracın gerçekten aldığı yatay yol (blok). */
+	private static float travelInTicks(final ClientGameTestContext context, final int ticks) {
+		final float x0 = load(context, car -> (float) car.getX());
+		final float z0 = load(context, car -> (float) car.getZ());
+		context.waitTicks(ticks);
+		final float dx = load(context, car -> (float) car.getX()) - x0;
+		final float dz = load(context, car -> (float) car.getZ()) - z0;
+		return (float) Math.sqrt(dx * dx + dz * dz);
+	}
+
+	/** Virajda yana yatma ve frende burun dalmasını sınar, kare de alır. */
+	private static void checkSuspension(final ClientGameTestContext context) {
+		context.getInput().holdKey(options -> options.keyLeft);
+		context.waitTicks(14);
+		context.takeScreenshot("94-virajda-yatma");
+		final float roll = load(context, CarEntity::lateralLoad);
+		context.getInput().releaseKey(options -> options.keyLeft);
+
+		final int squealsBefore = context.computeOnClient(client -> CarSoundManager.brakeSoundCount());
+		context.getInput().releaseKey(options -> options.keyUp);
+		context.getInput().holdKey(options -> options.keyDown);
+		context.waitTicks(4);
+		context.takeScreenshot("95-frende-burun-dalmasi");
+		final float dive = load(context, CarEntity::longitudinalLoad);
+		final boolean braking = load(context, car -> car.braking() ? 1.0F : 0.0F) > 0.5F;
+		context.waitTicks(20);
+		final int squeals = context.computeOnClient(client -> CarSoundManager.brakeSoundCount())
+			- squealsBefore;
+		context.getInput().releaseKey(options -> options.keyDown);
+		context.getInput().holdKey(options -> options.keyUp);
+
+		if (Math.abs(roll) < 0.05F) {
+			throw new AssertionError("Virajda gövdeye yanal yük binmedi: " + roll);
+		}
+		if (dive > -0.05F || !braking) {
+			throw new AssertionError("Frende burun dalmadı: " + dive + ", fren=" + braking);
+		}
+		if (squeals == 0) {
+			throw new AssertionError("Fren sesi hiç çalınmadı");
+		}
+	}
+
+	/**
+	 * İkinci bir yolcunun araca binebildiğini, ama aracı süremediğini sınar.
+	 *
+	 * <p>Sunucuda ikinci bir canlı bindirilir; direksiyonun ilk binende kalması
+	 * gerekir, yoksa iki kişi aynı anda aracı sürmeye çalışırdı.
+	 */
+	private static void checkSecondPassenger(final ClientGameTestContext context,
+											 final TestSingleplayerContext singleplayer) {
+		singleplayer.getServer().runOnServer(unused -> {
+			final var level = singleplayer.getConnection().getServerLevel();
+			final var player = singleplayer.getConnection().getServerPlayer();
+			if (!(player.getVehicle() instanceof CarEntity car)) {
+				throw new AssertionError("İkinci yolcu sınanamadı: oyuncu araçta değil");
+			}
+			final var passenger = net.minecraft.world.entity.EntityTypes.VILLAGER
+				.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (passenger == null) {
+				throw new AssertionError("Yolcu yaratılamadı");
+			}
+			passenger.setPos(car.getX(), car.getY() + 1.0D, car.getZ());
+			level.addFreshEntity(passenger);
+			if (!passenger.startRiding(car)) {
+				throw new AssertionError("İkinci yolcu araca binemedi");
+			}
+			if (car.getPassengers().size() != 2) {
+				throw new AssertionError("Araçta beklenen 2 yolcu, bulunan "
+					+ car.getPassengers().size());
+			}
+			if (car.getControllingPassenger() != player) {
+				throw new AssertionError("Direksiyon ilk binende kalmadı");
+			}
+		});
+		context.waitTicks(10);
 	}
 
 	/**
@@ -277,10 +408,10 @@ public class CarClientGameTest implements FabricClientGameTest {
 	 * doğrudan sebebi söyler.
 	 */
 	private static void mountByRightClick(final ClientGameTestContext context,
-										  final TestSingleplayerContext singleplayer) {
-		singleplayer.getServer().runCommand("tp @a -60 " + (GROUND_Y + 1) + " -3 0 20");
+										  final TestSingleplayerContext singleplayer, final int carX) {
+		singleplayer.getServer().runCommand("tp @a " + carX + " " + (GROUND_Y + 1) + " -3 0 20");
 		context.waitTicks(10);
-		context.getInput().lookAt(new BlockPos(-60, GROUND_Y, 0));
+		context.getInput().lookAt(new BlockPos(carX, GROUND_Y, 0));
 		context.waitTicks(5);
 
 		final boolean aimed = context.computeOnClient(client ->

@@ -439,9 +439,18 @@ public enum CarModel implements StringRepresentable {
 		return this.body;
 	}
 
-	/** Çarpışma kutusu genişliği (blok). */
+	/**
+	 * Çarpışma kutusu genişliği (blok).
+	 *
+	 * <p>Minecraft'ta çarpışma kutusu yatayda karedir, araç ise döner. Kutuyu
+	 * aracın <em>uzunluğuna</em> göre seçmek her yönde güvenli olurdu ama 5
+	 * metrelik bir araba için 3 blokluk bir kare demek: araç yolun kenarına
+	 * sürtüp durur, sürüş takılmalı ve dengesiz hissedilir. Bu yüzden kutu
+	 * aracın genişliğini alır; karşılığında araç uzunlamasına bloklara biraz
+	 * girer.
+	 */
 	public float hitboxWidth() {
-		return Math.max(this.body.width(), this.body.length() * 0.55F) / 16.0F;
+		return this.body.width() / 16.0F;
 	}
 
 	/** Çarpışma kutusu yüksekliği (blok). */
