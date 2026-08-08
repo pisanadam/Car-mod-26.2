@@ -5,6 +5,7 @@ import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
 import com.pisanadam.realcars.registry.ModEntities;
+import com.pisanadam.realcars.client.sound.CarSoundManager;
 import com.pisanadam.realcars.registry.ModMenus;
 import java.util.List;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -210,12 +211,16 @@ public class CarClientGameTest implements FabricClientGameTest {
 		context.getInput().releaseKey(options -> options.keyLeft);
 		context.getInput().releaseKey(options -> options.keyUp);
 
-		// Sert fren: burun dalıyor, stop lambaları yanıyor mu?
+		// Sert fren: burun dalıyor, stop lambaları yanıyor, gıcırtı duyuluyor mu?
+		final int squealsBefore = context.computeOnClient(client -> CarSoundManager.brakeSoundCount());
 		context.getInput().holdKey(options -> options.keyDown);
 		context.waitTicks(4);
 		context.takeScreenshot("95-frende-burun-dalmasi");
 		final float dive = load(context, CarEntity::longitudinalLoad);
 		final boolean braking = load(context, car -> car.braking() ? 1.0F : 0.0F) > 0.5F;
+		context.waitTicks(20);
+		final int squeals = context.computeOnClient(client -> CarSoundManager.brakeSoundCount())
+			- squealsBefore;
 		context.getInput().releaseKey(options -> options.keyDown);
 		context.runOnClient(client -> client.options.setCameraType(CameraType.FIRST_PERSON));
 
@@ -231,6 +236,10 @@ public class CarClientGameTest implements FabricClientGameTest {
 		if (dive > -0.05F || !braking) {
 			throw new AssertionError("Frende burun dalmadı: " + dive + ", fren=" + braking);
 		}
+		if (squeals == 0) {
+			throw new AssertionError("Fren sesi hiç çalınmadı");
+		}
+		System.out.println("[RealCars] frende " + squeals + " kez gıcırtı çalındı");
 		context.waitTicks(40);
 
 		// Modifiye ekranı
