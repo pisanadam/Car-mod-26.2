@@ -139,6 +139,33 @@ aynı arabayla asfaltta çıkardığın hızı çimende çıkaramazsın.
 
 ---
 
+## Araç gövdeleri nasıl çiziliyor
+
+Minecraft yalnızca eksen hizalı kutu çizebilir, ama bir *parçanın tamamı*
+döndürülebilir. Bu yüzden modeldeki her eğim, uygun açıyla yatırılmış ince bir
+paneldir: eğimli kaput, yatık ön cam, fastback sırtı, Beetle'ın kesintisiz
+kavisi hepsi böyle kuruluyor. Panelin altında kalan boşluk, panel kalınlığının
+içinde kalacak kadar ince basamaklarla dolduruluyor, bu yüzden dışarıdan
+merdiven görünmüyor.
+
+Her araç `CarModel.java` içinde bir **yan profille** tanımlı: burun yüksekliği,
+kaputun bittiği yer, cam altı hattı, tavanın iki ucu, arka camın dibi ve kuyruk.
+Bunlar gerçek bir araç fotoğrafından okunabilen ölçüler; ön cam açısı gibi
+şeyler otomatik çıkıyor. `Silhouette` de her bölümün kaç panele bölüneceğini ve
+ne kadar kavis yapacağını söylüyor — aynı kod hem Defender'ın dik duvarını hem
+Beetle'ın kubbesini üretiyor.
+
+Tekerlekler kare değil: 45 derece aralıklı dört şeridin birleşimi, yani düzgün
+bir sekizgen. Şerit ölçüleri köşeler tam çemberin üstüne düşecek biçimde
+seçildiği için tekerlek yıldıza dönüşmüyor.
+
+Araç sürerken **gövde ile tekerlekler ayrı hareket ediyor**: virajda gövde yana
+yatıyor, frende burun dalıyor, tekerlekler yerde kalıyor. Motor açıkken farlar,
+fren yapınca stoplar ayrı bir ışık geçişinde çiziliyor, yani gece gerçekten
+parlıyorlar.
+
+---
+
 ## Bilmen gereken birkaç şey
 
 - **Hız gerçek ölçekte.** 1 blok = 1 metre kabul edilir, dolayısıyla göstergedeki
@@ -197,9 +224,10 @@ JAVA_HOME=<jdk25> ./gradlew build     # derleme
 python3 tools/validate_assets.py      # kaynak bütünlüğü
 JAVA_HOME=<jdk25> tools/smoke_test.sh # başsız sunucuda 12 aracı spawn edip günlüğü tarar
 
-# Oyunu gerçekten açan görsel test: dünya kurar, araçları çıkarır, bir tanesine
-# binip gaza basar ve hızlandığını doğrular, sonra ekran görüntülerini
-# build/run/clientGametest/screenshots altına bırakır.
+# Oyunu gerçekten açan görsel test: dünya kurar, on iki aracın her birini tek
+# tek yandan ve 3/4 açıdan fotoğraflar, sonra bir tanesine binip hızlanmayı,
+# virajda yatmayı, frende burun dalmasını ve stop lambalarını sayılarla
+# doğrular. Görüntüler build/run/clientGametest/screenshots altına düşer.
 JAVA_HOME=<jdk25> ./gradlew runClientGametest
 # Başsız bir makinede (yazılım OpenGL ile):
 LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x720x24" \

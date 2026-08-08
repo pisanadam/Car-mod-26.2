@@ -10,8 +10,12 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.util.Mth;
 
 /**
- * Araç modeli. Boyanan ve boyanmayan parçalar ayrı köklerde tutulur; renderer
- * ikisini farklı renklerle gönderdiği için tek dokudan istenen boya çıkar.
+ * Araç modeli. Parçalar dört köke ayrılır (boyanan gövde, boyanmayan parçalar,
+ * tekerlekler, parlayan lambalar); renderer her kökü kendi rengi ve çizim
+ * tipiyle gönderdiği için tek dokudan hem istenen boya hem gece yanan far çıkar.
+ *
+ * <p>Tekerleklerin ayrı bir kökte olmasının sebebi süspansiyon: gövde virajda
+ * yatıp frende burnunu daldırırken tekerlekler yerde kalmalıdır.
  */
 public class CarModel3D extends EntityModel<CarRenderState> {
 	private static final int WHEEL_SLOTS = CarMeshFactory.WheelPosition.values().length;
@@ -20,6 +24,10 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 
 	private final ModelPart painted;
 	private final ModelPart plain;
+	private final ModelPart wheelRoot;
+	private final ModelPart lights;
+	private final ModelPart headlights;
+	private final ModelPart brakelights;
 	private final Map<SpoilerType, ModelPart> spoilers = new EnumMap<>(SpoilerType.class);
 	/** Her tekerlek yuvası için tip -> tekerlek parçası. */
 	private final Map<WheelType, ModelPart>[] wheels = newWheelSlots();
@@ -33,6 +41,10 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		super(root, RenderTypes::entityCutoutCull);
 		this.painted = root.getChild(CarMeshFactory.PAINTED);
 		this.plain = root.getChild(CarMeshFactory.PLAIN);
+		this.wheelRoot = root.getChild(CarMeshFactory.WHEELS);
+		this.lights = root.getChild(CarMeshFactory.LIGHTS);
+		this.headlights = this.lights.getChild(CarMeshFactory.HEADLIGHTS);
+		this.brakelights = this.lights.getChild(CarMeshFactory.BRAKELIGHTS);
 
 		for (final SpoilerType spoiler : SpoilerType.values()) {
 			if (spoiler.hasItem()) {
@@ -42,7 +54,7 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		}
 
 		for (final CarMeshFactory.WheelPosition position : CarMeshFactory.WheelPosition.values()) {
-			final ModelPart slot = this.plain.getChild(CarMeshFactory.WHEEL_PREFIX + position.partName());
+			final ModelPart slot = this.wheelRoot.getChild(CarMeshFactory.WHEEL_PREFIX + position.partName());
 			final Map<WheelType, ModelPart> perType = new EnumMap<>(WheelType.class);
 			for (final WheelType type : WheelType.values()) {
 				perType.put(type, slot.getChild(type.itemName()));
@@ -59,6 +71,19 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		return this.plain;
 	}
 
+	public ModelPart wheelRoot() {
+		return this.wheelRoot;
+	}
+
+	public ModelPart lights() {
+		return this.lights;
+	}
+
+	/** Motor açıkken far, fren yaparken stop yanar; ikisi de kapalıysa çizim atlanabilir. */
+	public boolean anyLightOn() {
+		return this.headlights.visible || this.brakelights.visible;
+	}
+
 	@Override
 	public void setupAnim(final CarRenderState state) {
 		super.setupAnim(state);
@@ -67,6 +92,9 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		for (final Map.Entry<SpoilerType, ModelPart> entry : this.spoilers.entrySet()) {
 			entry.getValue().visible = entry.getKey() == state.spoiler;
 		}
+
+		this.headlights.visible = state.engineOn;
+		this.brakelights.visible = state.braking;
 
 		final float spin = state.wheelAngle * Mth.DEG_TO_RAD;
 		final float steer = -state.steerAngle * MAX_STEER_DEGREES * Mth.DEG_TO_RAD;

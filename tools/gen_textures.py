@@ -44,6 +44,8 @@ ATLAS_REGIONS = {
     "light_front": (256, 384, 64, 64),
     "light_rear":  (320, 384, 64, 64),
     "chrome":      (384, 384, 128, 128),
+    # Kapı ayrım çizgileri ve gölgeli oyuklar
+    "body_dark":   (0, 448, 192, 64),
 }
 
 
@@ -57,16 +59,26 @@ def gen_car_atlas():
     c.vshade(x, y, w, h, 14, -30)
     c.noise(x, y, w, h, 3, seed=1)
 
-    # Cam: koyu mavi-gri, üstte parlama
+    # Cam: koyu mavi-gri, üstte parlama. Çapraz yansıma şeritleri ikişerli
+    # ve değişken parlaklıkta; böylece eğimli panellerde gerçek bir cam gibi
+    # kırılan ışık izlenimi verir.
     x, y, w, h = ATLAS_REGIONS["glass"]
-    c.rect(x, y, w, h, (38, 48, 62))
-    c.vshade(x, y, w, h, 34, -10)
-    for i in range(0, w, 18):
-        c.line(x + i, y + h - 1, x + i + h, y, (72, 88, 108))
+    c.rect(x, y, w, h, (30, 40, 54))
+    c.vshade(x, y, w, h, 46, -14)
+    # Şeritler bölgenin tamamını kaplasın diye köşegen desen sarmalı çizilir;
+    # bölgeden taşan bir çizgi komşu malzemeyi bozardı.
+    for py in range(h):
+        for px in range(w):
+            phase = (px + py) % 16
+            if phase == 0:
+                c.px_set(x + px, y + py, (86, 104, 128))
+            elif phase == 3:
+                c.px_set(x + px, y + py, (58, 72, 92))
+    c.noise(x, y, w, h, 3, seed=9)
 
     # Siyah plastik trim / tampon
     x, y, w, h = ATLAS_REGIONS["trim"]
-    c.rect(x, y, w, h, (30, 32, 36))
+    c.rect(x, y, w, h, (48, 50, 56))
     c.noise(x, y, w, h, 5, seed=2)
     c.scanlines(x, y, w, h, 7, step=6)
 
@@ -87,10 +99,11 @@ def gen_car_atlas():
 
     # Farlar
     x, y, w, h = ATLAS_REGIONS["light_front"]
-    c.rect(x, y, w, h, (246, 244, 210))
-    c.vshade(x, y, w, h, 8, -40)
-    for i in range(0, w, 10):
-        c.vline(x + i, y, h, (255, 253, 236))
+    c.rect(x, y, w, h, (226, 232, 238))
+    c.vshade(x, y, w, h, 12, -46)
+    for i in range(0, w, 4):
+        c.vline(x + i, y, h, (250, 252, 255))
+        c.vline(x + i + 2, y, h, (176, 190, 204))
 
     x, y, w, h = ATLAS_REGIONS["light_rear"]
     c.rect(x, y, w, h, (172, 26, 26))
@@ -113,10 +126,14 @@ def gen_car_atlas():
 
     # Panjur (ön ızgara)
     x, y, w, h = ATLAS_REGIONS["grille"]
-    c.rect(x, y, w, h, (22, 24, 27))
-    for i in range(0, h, 6):
-        c.hline(x, y + i, w, (58, 62, 68))
-        c.hline(x, y + i + 2, w, (12, 13, 15))
+    c.rect(x, y, w, h, (34, 37, 42))
+    for i in range(0, h, 3):
+        c.hline(x, y + i, w, (86, 92, 102))
+        c.hline(x, y + i + 1, w, (16, 17, 20))
+
+    # Kapı ayrım çizgisi / koyu oyuk — boyayla çarpıldığında gövdenin koyu tonu
+    x, y, w, h = ATLAS_REGIONS["body_dark"]
+    c.rect(x, y, w, h, (78, 80, 84))
 
     # Alt gövde / şasi
     x, y, w, h = ATLAS_REGIONS["under"]

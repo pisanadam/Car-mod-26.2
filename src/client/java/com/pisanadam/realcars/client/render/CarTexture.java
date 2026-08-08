@@ -33,6 +33,8 @@ public record CarTexture(int u, int v, int width, int height) {
 	public static final CarTexture LIGHT_FRONT = new CarTexture(256, 384, 64, 64);
 	public static final CarTexture LIGHT_REAR = new CarTexture(320, 384, 64, 64);
 	public static final CarTexture CHROME = new CarTexture(384, 384, 128, 128);
+	/** Kapı ayrım çizgisi, hava girişi gibi gölgeli oyuklar. */
+	public static final CarTexture BODY_DARK = new CarTexture(0, 448, 192, 64);
 
 	/**
 	 * Verilen ölçülerdeki bir kutunun UV ayak izi bu bölgeye sığıyor mu?

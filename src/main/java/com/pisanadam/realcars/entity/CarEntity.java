@@ -93,6 +93,10 @@ public class CarEntity extends VehicleEntity {
 	private float wheelAngleO;
 	private int shiftCooldown;
 	private boolean wheelSlip;
+	/** Süspansiyon hareketini besleyen yükler — her iki tarafta da hesaplanır. */
+	private float prevSpeedKmh;
+	private float longAccel;
+	private float lateralLoad;
 	/** İstemcide yerel oyuncunun tuş durumu; sunucuda kullanılmaz. */
 	private Input clientInput = Input.EMPTY;
 
@@ -255,7 +259,40 @@ public class CarEntity extends VehicleEntity {
 		}
 
 		this.updateWheelSpin();
+		this.updateChassisLoads();
 		this.spawnGroundEffects();
+	}
+
+	/**
+	 * Gövdenin viraj/fren hareketini besleyen yükleri günceller.
+	 *
+	 * <p>Yalnızca zaten yayınlanan hız ve direksiyon açısından türetildiği için
+	 * fiziği kimin işlettiğinden bağımsız olarak her tarafta doğru çalışır;
+	 * ek bir senkron alanı gerekmez.
+	 */
+	private void updateChassisLoads() {
+		final float speed = this.speedKmh();
+		this.longAccel = Mth.lerp(0.25F, this.longAccel, speed - this.prevSpeedKmh);
+		this.prevSpeedKmh = speed;
+		// Yanal yük hem direksiyon açısına hem hıza bağlıdır: dururken
+		// direksiyon çevirmek aracı yatırmaz.
+		final float lateral = this.steerAngle() * Mth.clamp(Math.abs(speed) / 90.0F, 0.0F, 1.0F);
+		this.lateralLoad = Mth.lerp(0.2F, this.lateralLoad, lateral);
+	}
+
+	/** Boyuna yük: -1 sert fren (burun daldı), +1 tam gaz (arka çöktü). */
+	public float longitudinalLoad() {
+		return Mth.clamp(this.longAccel / 2.2F, -1.0F, 1.0F);
+	}
+
+	/** Yanal yük: -1 sola, +1 sağa yatma. */
+	public float lateralLoad() {
+		return Mth.clamp(this.lateralLoad, -1.0F, 1.0F);
+	}
+
+	/** Stop lambaları yansın mı? */
+	public boolean braking() {
+		return this.longAccel < -0.35F && Math.abs(this.speedKmh()) > 1.0F;
 	}
 
 	/** Bir tick'lik sürüş simülasyonu: girdi, vites, çekiş, direksiyon, yakıt. */
@@ -299,8 +336,13 @@ public class CarEntity extends VehicleEntity {
 			}
 		}
 
-		// Tutuş, aktarılabilecek kuvveti sınırlar; fazlası patinaja gider.
-		final float maxTraction = 0.55F * grip / Mth.clamp(this.model.massFactor(), 0.6F, 1.8F);
+		// Tutuş, aktarılabilecek kuvveti sınırlar; fazlası patinaja gider. Sınır
+		// aracın kendi ivmesine göre ölçeklenir: asfaltta uygun lastikle
+		// (grip ~1) tavan ivmenin üstünde kalır, yani araç kataloğundaki 0-100
+		// süresini gerçekten tutturur. Toprakta ve buzda ise sınır ivmenin
+		// altına düşer ve tekerlek boşa döner.
+		final float baseAccelFor = 100.0F / (this.model.accelSeconds() * 20.0F);
+		final float maxTraction = baseAccelFor * (0.55F + 0.75F * grip);
 		this.wheelSlip = Math.abs(accel) > maxTraction && Math.abs(this.speedKmh) < topSpeed * 0.5F;
 		accel = Mth.clamp(accel, -maxTraction, maxTraction);
 
@@ -330,7 +372,10 @@ public class CarEntity extends VehicleEntity {
 			-MAX_BLOCKS_PER_TICK, MAX_BLOCKS_PER_TICK);
 		final float yawRad = this.getYRot() * Mth.DEG_TO_RAD;
 		double vy = this.getDeltaMovement().y;
-		vy = airborne ? vy - 0.08D : Math.min(0.0D, vy);
+		// Yerdeyken de küçük bir aşağı hız gerekir: dikey hız tam sıfır olursa
+		// move() zemine bastırmaz ve bir sonraki tick onGround yanlış çıkar.
+		// Araç bir tick yerde bir tick havada sayılır, ivme ve tutuş yarıya iner.
+		vy = airborne ? vy - 0.08D : -0.08D;
 		this.setDeltaMovement(-Mth.sin(yawRad) * blocksPerTick, vy, Mth.cos(yawRad) * blocksPerTick);
 
 		// --- yakıt tüketimi ---
@@ -683,8 +728,8 @@ public class CarEntity extends VehicleEntity {
 		final int index = Math.max(0, this.getPassengers().indexOf(passenger));
 		// Sürücü sol ön, sonraki yolcular sağ ön ve arka koltuklar.
 		final float x = (index == 1 || index == 3) ? body.width() / 56.0F : -body.width() / 56.0F;
-		final float z = index < 2 ? (body.cabinZ() - 4.0F) / 16.0F : (body.cabinZ() + 8.0F) / 16.0F;
-		final float y = (body.clearance() + body.bodyHeight() * 0.65F) / 16.0F;
+		final float z = index < 2 ? (body.cabinCenterZ() - 4.0F) / 16.0F : (body.cabinCenterZ() + 8.0F) / 16.0F;
+		final float y = body.seatHeight() / 16.0F;
 		return new Vec3(x, y, z);
 	}
 

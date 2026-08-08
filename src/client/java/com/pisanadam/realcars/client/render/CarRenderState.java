@@ -18,4 +18,10 @@ public class CarRenderState extends EntityRenderState {
 	public float damageTime;
 	public int hurtDir = 1;
 	public boolean engineOn;
+	/** Fren yapılıyor mu — stop lambaları buna bakar. */
+	public boolean braking;
+	/** Virajda yana yatma açısı (derece). */
+	public float bodyRoll;
+	/** Frende burun dalması / gazda arka çökmesi (derece). */
+	public float bodyPitch;
 }
