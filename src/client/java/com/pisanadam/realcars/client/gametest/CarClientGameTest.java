@@ -5,6 +5,7 @@ import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
 import com.pisanadam.realcars.registry.ModEntities;
+import com.pisanadam.realcars.client.input.CarKeyBindings;
 import com.pisanadam.realcars.client.sound.CarSoundManager;
 import com.pisanadam.realcars.registry.ModMenus;
 import java.util.List;
@@ -12,8 +13,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.CameraType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
 
 /**
  * Oyunu gerçekten açıp modun görsel tarafını sınayan istemci testi.
@@ -165,18 +168,17 @@ public class CarClientGameTest implements FabricClientGameTest {
 		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_DEFENDER, -60.0D, 0.0D, -90.0F));
 		context.waitTicks(6);
 
-		server.runOnServer(unused -> {
-			final var level = singleplayer.getConnection().getServerLevel();
-			final var player = singleplayer.getConnection().getServerPlayer();
-			final List<CarEntity> cars = level.getEntitiesOfClass(CarEntity.class, searchArea());
-			if (cars.isEmpty()) {
-				throw new AssertionError("Binilecek araç yok");
-			}
-			final CarEntity car = cars.getFirst();
-			car.setEngineOn(true);
-			player.startRiding(car, true, true);
-		});
-		context.waitTicks(30);
+		mountByRightClick(context, singleplayer);
+
+		// Motoru da oyuncunun bastığı tuşla çalıştır; sunucudan doğrudan
+		// setEngineOn çağırmak tuş yolunu sınamadan bırakırdı.
+		context.getInput().pressKey(CarKeyBindings.ENGINE_TOGGLE);
+		context.waitTicks(10);
+		final boolean running = load(context, car -> car.engineOn() ? 1.0F : 0.0F) > 0.5F;
+		if (!running) {
+			throw new AssertionError("G tuşuyla motor çalışmadı");
+		}
+		context.waitTicks(20);
 		context.takeScreenshot("92-gosterge");
 
 		// Süspansiyonu görmek için kamerayı arkaya al: birinci şahısta gövde
@@ -261,6 +263,39 @@ public class CarClientGameTest implements FabricClientGameTest {
 			client.player == null || client.player.getVehicle() == null);
 		if (!dismounted) {
 			throw new AssertionError("Oyuncu araçtan inemedi");
+		}
+	}
+
+	/**
+	 * Oyuncunun araca <em>gerçekten oyundaki gibi</em> binmesini sınar: araca
+	 * nişan alıp sağ tıklar.
+	 *
+	 * <p>Bu yol sunucudan {@code startRiding} çağırmakla aynı şey değildir.
+	 * Sağ tıklama önce nişan ışınının araca değmesini gerektirir; varlık
+	 * "seçilebilir" değilse ışın onu görmez ve araca hiç tıklanamaz. Bu yüzden
+	 * önce ışının araca değdiği ayrıca doğrulanır — hata orada olursa mesaj
+	 * doğrudan sebebi söyler.
+	 */
+	private static void mountByRightClick(final ClientGameTestContext context,
+										  final TestSingleplayerContext singleplayer) {
+		singleplayer.getServer().runCommand("tp @a -60 " + (GROUND_Y + 1) + " -3 0 20");
+		context.waitTicks(10);
+		context.getInput().lookAt(new BlockPos(-60, GROUND_Y, 0));
+		context.waitTicks(5);
+
+		final boolean aimed = context.computeOnClient(client ->
+			client.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof CarEntity);
+		if (!aimed) {
+			throw new AssertionError("Nişan ışını araca değmiyor: araç seçilebilir "
+				+ "(isPickable) değilse ona sağ tıklamak da vurmak da mümkün olmaz");
+		}
+
+		context.getInput().pressKey(options -> options.keyUse);
+		context.waitTicks(10);
+		final boolean riding = context.computeOnClient(client ->
+			client.player != null && client.player.getVehicle() instanceof CarEntity);
+		if (!riding) {
+			throw new AssertionError("Araca sağ tıklandı ama binilemedi");
 		}
 	}
 

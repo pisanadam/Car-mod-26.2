@@ -778,6 +778,19 @@ public class CarEntity extends VehicleEntity {
 		this.clampRotation(passenger);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>Bu olmadan araca hiç sağ tıklanamaz: nişan alma ışını yalnızca
+	 * "seçilebilir" varlıklara değer ve {@code Entity} varsayılanı
+	 * {@code false}'tur. Tekne ve vagon da tam olarak bunu geçersiz kılar.
+	 * Eksikliği yalnızca araca binmeyi değil, ona vurup kırmayı da engellerdi.
+	 */
+	@Override
+	public boolean isPickable() {
+		return !this.isRemoved();
+	}
+
 	@Override
 	public boolean canBeCollidedWith(final @Nullable Entity other) {
 		return true;
