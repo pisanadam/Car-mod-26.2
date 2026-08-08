@@ -155,9 +155,17 @@ Bunlar gerçek bir araç fotoğrafından okunabilen ölçüler; ön cam açısı
 ne kadar kavis yapacağını söylüyor — aynı kod hem Defender'ın dik duvarını hem
 Beetle'ın kubbesini üretiyor.
 
-Tekerlekler kare değil: 45 derece aralıklı dört şeridin birleşimi, yani düzgün
-bir sekizgen. Şerit ölçüleri köşeler tam çemberin üstüne düşecek biçimde
-seçildiği için tekerlek yıldıza dönüşmüyor.
+Tekerlekler kare değil: 30 derece aralıklı altı şeridin birleşimi, yani 12
+kenarlı pikselli bir yuvarlak — yarıçap en fazla %3 dalgalanıyor. Şerit
+ölçüleri (`r·cos15°`, `r·sin15°`) köşeler tam çemberin üstüne düşsün diye
+seçildi; tam kare kullanmak köşeleri `r√2`'ye taşıyıp tekerleği çok köşeli bir
+yıldıza çevirirdi.
+
+Tekerleğin görünmesi için gövdede gerçek bir **çamurluk boşluğu** var. Minecraft
+kutudan malzeme çıkaramadığı için boşluk, o bölgeyi hiç doldurmayarak açılıyor:
+kemer tepesinin üstü her yerde tam genişlikte, altı ise tekerleklerin hizasında
+içeri çekiliyor. Yoksa gövde tekerleğin önünü kapatır ve lastiğin yalnızca ince
+bir dilimi dışarı taşardı.
 
 Araç sürerken **gövde ile tekerlekler ayrı hareket ediyor**: virajda gövde yana
 yatıyor, frende burun dalıyor, tekerlekler yerde kalıyor. Motor açıkken farlar,

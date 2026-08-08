@@ -63,12 +63,22 @@ public final class CarMeshFactory {
 	private static final float MAX_STEP = PANEL * 0.30F;
 	/** Basamak tepeleri panelin orta yüzeyinin bu kadar altına gömülür. */
 	private static final float STEP_SINK = PANEL * 0.30F;
-	/** Tekerleği oluşturan şerit sayısı — dördü düzgün bir sekizgen verir. */
-	private static final int OCTAGON_FACETS = 4;
-	/** Şeridin uzun yarı ölçüsü: köşeleri çember üzerine düşürür. */
-	private static final float FACET_LONG = Mth.cos(Mth.PI / (2.0F * OCTAGON_FACETS));
+	/**
+	 * Tekerleği oluşturan şerit sayısı; sonuç {@code 2 x} kenarlı bir çokgendir.
+	 * Altı şerit 12 kenar demek: yarıçap en fazla %3 dalgalanır, yani tekerlek
+	 * dönerken gözle yuvarlak görünür.
+	 */
+	private static final int WHEEL_FACETS = 6;
+	/** Şeridin uzun yarı ölçüsü: köşeleri tam çemberin üstüne düşürür. */
+	private static final float FACET_LONG = Mth.cos(Mth.PI / (2.0F * WHEEL_FACETS));
 	/** Şeridin ince yarı ölçüsü. */
-	private static final float FACET_THIN = Mth.sin(Mth.PI / (2.0F * OCTAGON_FACETS));
+	private static final float FACET_THIN = Mth.sin(Mth.PI / (2.0F * WHEEL_FACETS));
+	/**
+	 * Çamurluk boşluğunda gövdenin her yandan içeri çekildiği miktar. Tekerlek
+	 * bu boşluğa oturur; yoksa gövde tam genişlikte kalır ve lastiğin yalnızca
+	 * ince bir dilimi dışarı taşar.
+	 */
+	private static final float ARCH_INSET = 3.8F;
 
 	private CarMeshFactory() {
 	}
@@ -82,7 +92,7 @@ public final class CarMeshFactory {
 		final PartDefinition lights = root.addOrReplaceChild(LIGHTS, CubeListBuilder.create(), PartPose.ZERO);
 
 		final CarModel.Body body = model.body();
-		buildLowerBody(painted, body);
+		buildLowerBody(painted, model, body);
 		buildUpperPanels(painted, body);
 		buildGreenhouse(painted, plain, body);
 		buildFendersAndSills(painted, model, body);
@@ -105,50 +115,101 @@ public final class CarMeshFactory {
 	 * Gövdeyi tabandan cam altı hattına kadar doldurur. Tavanı, yan profilin
 	 * cam altı hattıyla sınırlanmış hâlidir: burunda kaputun eğimini izler,
 	 * kabin boyunca düzdür, kuyrukta yeniden alçalır.
+	 *
+	 * <p>Gövde yatay olarak da ikiye ayrılır. Çamurluk kemerinin tepesinden
+	 * yukarısı her yerde tam genişliktir; aşağısı ise tekerleklerin hizasında
+	 * {@link #ARCH_INSET} kadar içeri çekilir. Minecraft kutudan malzeme
+	 * çıkaramadığı için tekerlek boşluğu ancak böyle, o bölgeyi hiç doldurmayarak
+	 * açılabilir. Aksi hâlde gövde tekerleğin önünü kapatır ve lastiğin yalnızca
+	 * ince bir dilimi görünür.
 	 */
-	private static void buildLowerBody(final PartDefinition painted, final CarModel.Body body) {
-		final float halfL = body.halfLength();
+	private static void buildLowerBody(final PartDefinition painted, final CarModel model,
+									   final CarModel.Body body) {
 		final float belt = body.beltHeight();
 		final float base = body.clearance();
-		final CubeListBuilder hull = CubeListBuilder.create()
-			.texOffs(CarTexture.BODY.u(), CarTexture.BODY.v());
+		final float archTop = archTop(model);
+		final float archHalf = archHalf(model);
+		final CubeListBuilder hull = CubeListBuilder.create();
 
-		// Burun: kaput hattı boyunca basamaklı yükselen kama
-		for (final float[] seg : chain(body, Section.NOSE)) {
-			wedge(hull, "hull_nose", CarTexture.BODY, seg[0], Math.min(seg[1], belt), seg[2], Math.min(seg[3], belt),
-				base, body.width());
+		// --- kemer tepesinin üstü: her yerde tam genişlik ---
+		fillBand(hull, "hull_upper", body, -body.halfLength(), body.halfLength(),
+			archTop, belt, body.width());
+
+		// --- kemer tepesinin altı: tekerlek hizasında içeri çekilir ---
+		float z = -body.halfLength();
+		for (final float[] window : archWindows(body, archHalf)) {
+			fillBand(hull, "hull_lower", body, z, window[0], base, archTop, body.width());
+			fillBand(hull, "hull_arch", body, window[0], window[1], base, archTop,
+				body.width() - 2.0F * ARCH_INSET);
+			z = window[1];
 		}
-
-		// Kabin bölgesi: profil cam altı hattının üstünde olduğu için düz
-		final float flatEnd = beltCrossing(body);
-		box(hull, "hull_mid", CarTexture.BODY, -body.halfWidth(), belt, body.cowlZ(),
-			body.width(), belt - base, flatEnd - body.cowlZ());
-
-		// Kuyruk: cam altı hattının altına düşen kısım (fastback ve Beetle'da belirgin)
-		if (flatEnd < halfL) {
-			wedge(hull, "hull_tail", CarTexture.BODY, flatEnd, belt, halfL, Math.min(body.tailHeight(), belt),
-				base, body.width());
-		}
+		fillBand(hull, "hull_lower", body, z, body.halfLength(), base, archTop, body.width());
 
 		painted.addOrReplaceChild("hull", hull, PartPose.ZERO);
 	}
 
-	/** Yan profilin kuyruk tarafında cam altı hattını son kez kestiği Z. */
-	private static float beltCrossing(final CarModel.Body body) {
+	/** Çamurluk kemerinin tepe yüksekliği — fabrika tekerleğinin çapından çıkar. */
+	private static float archTop(final CarModel model) {
+		return 2.0F * model.defaultWheel().radius() + 1.2F;
+	}
+
+	/** Kemer boşluğunun aks etrafında Z yönünde yarı uzunluğu. */
+	private static float archHalf(final CarModel model) {
+		return model.defaultWheel().radius() + 3.0F;
+	}
+
+	/** İki aksın çevresindeki, gövdenin içeri çekildiği Z aralıkları. */
+	private static java.util.List<float[]> archWindows(final CarModel.Body body, final float archHalf) {
 		final float halfL = body.halfLength();
-		if (body.tailHeight() >= body.beltHeight()) {
-			return halfL;
+		final java.util.List<float[]> windows = new java.util.ArrayList<>(2);
+		for (final float axle : new float[] {body.frontAxleZ(), body.rearAxleZ()}) {
+			final float from = Mth.clamp(axle - archHalf, -halfL, halfL);
+			final float to = Mth.clamp(axle + archHalf, -halfL, halfL);
+			if (to - from > 0.1F) {
+				windows.add(new float[] {from, to});
+			}
 		}
-		// Bagaj kapağından kuyruğa inen doğru üzerinde ara
-		if (body.deckHeight() >= body.beltHeight()) {
-			final float t = (body.deckHeight() - body.beltHeight())
-				/ Math.max(1.0E-4F, body.deckHeight() - body.tailHeight());
-			return body.deckZ() + t * (halfL - body.deckZ());
+		return windows;
+	}
+
+	/**
+	 * {@code z0..z1} arasını, tabandan yan profile (en çok {@code capHeight}'a)
+	 * kadar doldurur. Profil parçalı doğrusal olduğu için önce kırılma
+	 * noktalarından bölünür, sonra her düz parça basamaklı bir kamaya çevrilir.
+	 */
+	private static void fillBand(final CubeListBuilder out, final String name, final CarModel.Body body,
+								 final float z0, final float z1, final float baseHeight,
+								 final float capHeight, final float width) {
+		if (z1 - z0 < 0.05F || width <= 0.0F) {
+			return;
 		}
-		// Bagaj kapağı zaten cam altının altındaysa arka camda kesişir
-		final float t = (body.roofHeight() - body.beltHeight())
-			/ Math.max(1.0E-4F, body.roofHeight() - body.deckHeight());
-		return body.roofRearZ() + t * (body.deckZ() - body.roofRearZ());
+		float from = z0;
+		for (final float breakZ : profileBreaks(body)) {
+			if (breakZ <= from + 0.05F || breakZ >= z1 - 0.05F) {
+				continue;
+			}
+			fillPiece(out, name, body, from, breakZ, baseHeight, capHeight, width);
+			from = breakZ;
+		}
+		fillPiece(out, name, body, from, z1, baseHeight, capHeight, width);
+	}
+
+	private static void fillPiece(final CubeListBuilder out, final String name, final CarModel.Body body,
+								  final float z0, final float z1, final float baseHeight,
+								  final float capHeight, final float width) {
+		final float h0 = Math.min(body.profileHeight(z0), capHeight);
+		final float h1 = Math.min(body.profileHeight(z1), capHeight);
+		// Basamaklar yalnızca eğimli bir panelin (kaput ya da bagaj kapağı)
+		// altındayken gömülür; bir üst bandın dibinde gömülürlerse arada
+		// görünür bir boşluk açılırdı.
+		final boolean underSlab = z1 <= body.cowlZ() + 0.05F || z0 >= body.deckZ() - 0.05F;
+		final float sink = underSlab ? STEP_SINK : 0.0F;
+		wedge(out, name, CarTexture.BODY, z0, h0, z1, h1, baseHeight, width, sink);
+	}
+
+	/** Yan profilin kırılma noktaları. */
+	private static float[] profileBreaks(final CarModel.Body body) {
+		return new float[] {body.cowlZ(), body.roofFrontZ(), body.roofRearZ(), body.deckZ()};
 	}
 
 	// ----------------------------------------------------------------------
@@ -172,7 +233,7 @@ public final class CarMeshFactory {
 				seg[0], seg[1], seg[2], seg[3], body.width() - 1.0F, PANEL);
 			// Bagaj kapağı cam altı hattının üstündeyse altını doldur
 			wedge(deckFill, "deck_fill", CarTexture.BODY, seg[0], seg[1], seg[2], seg[3],
-				body.beltHeight() - 0.5F, body.width() - 1.5F);
+				body.beltHeight() - 0.5F, body.width() - 1.5F, STEP_SINK);
 		}
 		painted.addOrReplaceChild("deck_fill", deckFill, PartPose.ZERO);
 	}
@@ -192,13 +253,15 @@ public final class CarMeshFactory {
 			.texOffs(CarTexture.INTERIOR.u(), CarTexture.INTERIOR.v());
 		final float coreW = Math.max(4.0F, roofW - 3.4F);
 		for (final float[] seg : chain(body, Section.WINDSCREEN)) {
-			wedge(core, "cabin_core", CarTexture.INTERIOR, seg[0], seg[1] - 1.4F, seg[2], seg[3] - 1.4F, belt - 2.0F, coreW);
+			wedge(core, "cabin_core", CarTexture.INTERIOR, seg[0], seg[1] - 1.4F, seg[2], seg[3] - 1.4F,
+				belt - 2.0F, coreW, STEP_SINK);
 		}
 		box(core, "cabin_core", CarTexture.INTERIOR, -coreW / 2.0F, body.roofHeight() - 1.4F,
 			body.roofFrontZ(), coreW, body.roofHeight() - 1.4F - (belt - 2.0F),
 			body.roofRearZ() - body.roofFrontZ());
 		for (final float[] seg : chain(body, Section.BACKLIGHT)) {
-			wedge(core, "cabin_core", CarTexture.INTERIOR, seg[0], seg[1] - 1.4F, seg[2], seg[3] - 1.4F, belt - 2.0F, coreW);
+			wedge(core, "cabin_core", CarTexture.INTERIOR, seg[0], seg[1] - 1.4F, seg[2], seg[3] - 1.4F,
+				belt - 2.0F, coreW, STEP_SINK);
 		}
 		plain.addOrReplaceChild("cabin_core", core, PartPose.ZERO);
 
@@ -258,10 +321,9 @@ public final class CarMeshFactory {
 											 final CarModel.Body body) {
 		final float halfW = body.halfWidth();
 		final float flare = body.archFlare();
-		// Kemer yüksekliği fabrika tekerleğinin çapından çıkar; tip değişse de
-		// lastik hep kemerin altında kalacak kadar yakın durur.
-		final float archTop = 2.0F * model.defaultWheel().radius() + 1.2F;
-		final float archHalf = model.defaultWheel().radius() + 3.0F;
+		// Gövdedeki boşlukla aynı ölçüler: dudak tam tekerleğin üstüne oturur.
+		final float archTop = archTop(model);
+		final float archHalf = archHalf(model);
 
 		final CubeListBuilder fenders = CubeListBuilder.create()
 			.texOffs(CarTexture.BODY.u(), CarTexture.BODY.v());
@@ -399,8 +461,8 @@ public final class CarMeshFactory {
 			halfL - 1.0F, 3.0F, 1.4F, 2.4F);
 
 		// Alt gövde — araç yandan bakıldığında havada durmasın
-		addBox(plain, "underbody", CarTexture.UNDER, -halfW + 2.0F, body.clearance(),
-			-halfL + 2.0F, body.width() - 4.0F, 2.0F, body.length() - 4.0F);
+		addBox(plain, "underbody", CarTexture.UNDER, -halfW + ARCH_INSET + 0.5F, body.clearance(),
+			-halfL + 2.0F, body.width() - 2.0F * ARCH_INSET - 1.0F, 2.0F, body.length() - 4.0F);
 	}
 
 	// ----------------------------------------------------------------------
@@ -458,10 +520,12 @@ public final class CarMeshFactory {
 	 * altında durduğu için dönüş ve direksiyon açısı hepsine birden uygulanır.
 	 */
 	private static void buildWheels(final PartDefinition wheels, final CarModel.Body body) {
-		final float xOffset = body.halfWidth() - WHEEL_WIDTH * 0.35F;
+		// Lastiğin iç yüzü kemer boşluğunun duvarının hemen içinde, dış yüzü
+		// gövdeden biraz dışarıda kalır; böylece tekerlek boşlukta durur.
+		final float xOffset = body.halfWidth() - ARCH_INSET + WHEEL_WIDTH / 2.0F - 0.4F;
 
 		for (final WheelPosition position : WheelPosition.values()) {
-			final float x = position.right() ? xOffset : -xOffset - WHEEL_WIDTH * 0.3F;
+			final float x = position.right() ? xOffset : -xOffset;
 			final float z = position.front() ? body.frontAxleZ() : body.rearAxleZ();
 			// Yuvanın kendisi yer hizasındadır; yükseklik tip grubundan gelir.
 			final PartDefinition slot = wheels.addOrReplaceChild(WHEEL_PREFIX + position.partName(),
@@ -472,7 +536,7 @@ public final class CarMeshFactory {
 				final float rim = tire * 0.62F;
 				final PartDefinition wheel = slot.addOrReplaceChild(type.itemName(),
 					CubeListBuilder.create(), PartPose.offset(0.0F, top(tire), 0.0F));
-				for (int facet = 0; facet < OCTAGON_FACETS; facet++) {
+				for (int facet = 0; facet < WHEEL_FACETS; facet++) {
 					final CubeListBuilder builder = CubeListBuilder.create();
 					box(builder, "tire", CarTexture.TIRE,
 						-WHEEL_WIDTH / 2.0F, tire * FACET_THIN, -tire * FACET_LONG,
@@ -482,7 +546,7 @@ public final class CarMeshFactory {
 						-WHEEL_WIDTH / 2.0F - 0.4F, rim * FACET_THIN, -rim * FACET_LONG,
 						WHEEL_WIDTH + 0.8F, rim * FACET_THIN * 2.0F, rim * FACET_LONG * 2.0F);
 					wheel.addOrReplaceChild("facet_" + facet, builder,
-						PartPose.rotation(facet * Mth.PI / OCTAGON_FACETS, 0.0F, 0.0F));
+						PartPose.rotation(facet * Mth.PI / WHEEL_FACETS, 0.0F, 0.0F));
 				}
 			}
 		}
@@ -663,7 +727,7 @@ public final class CarMeshFactory {
 	 */
 	private static void wedge(final CubeListBuilder out, final String name, final CarTexture region,
 							  final float z0, final float h0, final float z1, final float h1,
-							  final float baseHeight, final float width) {
+							  final float baseHeight, final float width, final float sink) {
 		if (z1 - z0 < 0.05F) {
 			return;
 		}
@@ -671,7 +735,7 @@ public final class CarMeshFactory {
 		final float dz = (z1 - z0) / steps;
 		for (int i = 0; i < steps; i++) {
 			final float zA = z0 + i * dz;
-			final float h = Mth.lerp((i + 0.5F) / steps, h0, h1) - STEP_SINK;
+			final float h = Mth.lerp((i + 0.5F) / steps, h0, h1) - sink;
 			if (h - baseHeight <= 0.05F) {
 				continue;
 			}
