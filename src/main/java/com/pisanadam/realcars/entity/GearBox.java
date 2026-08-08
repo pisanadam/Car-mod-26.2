@@ -70,6 +70,11 @@ public final class GearBox {
 	/**
 	 * Vites oranından gelen çekiş katsayısı — birinci vites en çok, son vites
 	 * en az kuvvet uygular.
+	 *
+	 * <p>Katsayı, viteslerin <em>ortalaması 1 olacak</em> biçimde ölçeklenir.
+	 * Ölçeklenmezse her vitesde 1'in üstünde bir çarpan uygulanır ve araç
+	 * kataloğundaki 0-100 süresinden daha fazla kuvvet üretir; bu da tutuş
+	 * sınırını sürekli aştırıp aracı bütün viteslerde patinajda gösterirdi.
 	 */
 	public static float pullFactor(final int gear, final int gearCount) {
 		if (gear == REVERSE) {
@@ -78,7 +83,20 @@ public final class GearBox {
 		if (gear == NEUTRAL) {
 			return 0.0F;
 		}
-		return (float) Math.pow((double) gearCount / Math.min(gear, gearCount), 0.45);
+		return rawPull(Math.min(gear, gearCount), gearCount) / meanPull(gearCount);
+	}
+
+	private static float rawPull(final int gear, final int gearCount) {
+		return (float) Math.pow((double) gearCount / gear, 0.45);
+	}
+
+	/** Bütün viteslerin çekiş katsayısı ortalaması. */
+	private static float meanPull(final int gearCount) {
+		double sum = 0.0;
+		for (int g = 1; g <= gearCount; g++) {
+			sum += rawPull(g, gearCount);
+		}
+		return (float) (sum / gearCount);
 	}
 
 	/** Otomatik şanzımanın bu devirde seçeceği vites. */

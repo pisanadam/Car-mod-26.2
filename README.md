@@ -186,6 +186,9 @@ parlıyorlar.
 - **Yanlış vites cezalandırır.** Manuel şanzımanda çok düşük ya da kırmızı bölge
   üstü devirde çekiş düşer; doğru anda vites değiştirmek gerçekten hızlandırır.
   Otomatik şanzıman bunu senin yerine yapar ama biraz güç kaybettirir.
+- **Tekerlek yolda kaymadan yuvarlanır.** Dönme açısı kat edilen yoldan
+  hesaplanır, yani lastik yerde kaymaz — görsel test bunu her koşuda sayıyla
+  doğruluyor. Patinaj anında ise bilerek yoldan hızlı döner.
 
 ---
 

@@ -197,6 +197,11 @@ public class CarClientGameTest implements FabricClientGameTest {
 		final float speed = Math.abs(load(context, CarEntity::speedKmh));
 		context.takeScreenshot("93-surus");
 
+		// Tekerlek gerçekten dönüyor mu? Açı, kat edilen yolun tekerlek
+		// çevresine bölümü kadar ilerlemeli — yani patinaj yokken lastik
+		// yolda kaymadan yuvarlanmalı.
+		checkWheelsRoll(context);
+
 		// Direksiyon kırılıyken gövde yana yatıyor mu?
 		context.getInput().holdKey(options -> options.keyLeft);
 		context.waitTicks(14);
@@ -237,6 +242,57 @@ public class CarClientGameTest implements FabricClientGameTest {
 		});
 		context.waitTicks(30);
 		context.takeScreenshot("96-modifiye-ekrani");
+	}
+
+	/**
+	 * Tekerleğin dönme açısının kat edilen yola uyduğunu doğrular.
+	 *
+	 * <p>Bir tur atan tekerlek {@code 2*pi*r} kadar yol alır; dolayısıyla
+	 * {@code N} tick'te ilerleyen açı, o sürede alınan yolun tekerlek çevresine
+	 * bölümünün 360 katı olmalıdır. Ekran görüntüsünden "dönüyor mu" sorusu
+	 * güvenilir okunmadığı için doğrulama sayıyla yapılır.
+	 */
+	private static void checkWheelsRoll(final ClientGameTestContext context) {
+		// Gaz kesilir: patinajda lastik yoldan hızlı döner, o yüzden ölçüm
+		// aracın serbest yuvarlandığı bir pencerede yapılır.
+		context.getInput().releaseKey(options -> options.keyUp);
+		context.waitTicks(10);
+
+		final float angleBefore = load(context, car -> car.wheelAngle(1.0F));
+		final float x0 = load(context, car -> (float) car.getX());
+		final float z0 = load(context, car -> (float) car.getZ());
+		final int ticks = 20;
+		context.waitTicks(ticks);
+		final boolean slipping = load(context, car -> car.wheelSlipping() ? 1.0F : 0.0F) > 0.5F;
+		context.getInput().holdKey(options -> options.keyUp);
+		// Açı, kayan nokta hassasiyeti için +-3600 derecede sarmalanır. Araç
+		// ileri gittiğinden fark pozitif olmalı; eksi çıktıysa ölçüm penceresi
+		// bir sarmalın üstüne denk gelmiştir. Pencere 3600 dereceden kısa
+		// tutulduğu için tek bir sarmal eklemek yeterlidir.
+		float turned = load(context, car -> car.wheelAngle(1.0F)) - angleBefore;
+		if (turned < 0.0F) {
+			turned += 3600.0F;
+		}
+
+		final float radiusBlocks = load(context, car -> car.wheelType().radius()) / 16.0F;
+		final double dx = load(context, car -> (float) car.getX()) - x0;
+		final double dz = load(context, car -> (float) car.getZ()) - z0;
+		final double travelled = Math.sqrt(dx * dx + dz * dz);
+		final float expected = (float) (travelled / (2.0D * Math.PI * radiusBlocks) * 360.0D);
+		System.out.printf("[RealCars] araç %.1f blok gitti, tekerlek %.0f derece döndü, "
+			+ "kaymadan yuvarlansa %.0f derece dönerdi%n", travelled, turned, expected);
+
+		if (turned < 90.0F) {
+			throw new AssertionError("Tekerlek dönmüyor: " + turned + " derece");
+		}
+		if (slipping) {
+			throw new AssertionError("Gaz kesikken araç hâlâ patinajda sayılıyor");
+		}
+		// Hızlanma sürdüğü için birebir tutması beklenmez; kabaca uyması yeter.
+		if (turned < expected * 0.9F || turned > expected * 1.1F) {
+			throw new AssertionError("Tekerlek dönüşü kat edilen yolla uyuşmuyor: " + turned
+				+ " derece, beklenen ~" + expected + " (" + travelled + " blok)");
+		}
 	}
 
 	/** Binilen araçtan istemci tarafında bir değer okur. */
