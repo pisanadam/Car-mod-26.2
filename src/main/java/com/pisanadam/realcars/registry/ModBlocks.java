@@ -3,6 +3,7 @@ package com.pisanadam.realcars.registry;
 import com.pisanadam.realcars.RealCars;
 import com.pisanadam.realcars.block.AssemblyTableBlock;
 import com.pisanadam.realcars.block.CarLiftBlock;
+import com.pisanadam.realcars.block.CarWorkbenchBlock;
 import com.pisanadam.realcars.block.FuelPumpBlock;
 import com.pisanadam.realcars.block.RoadLineBlock;
 import java.util.ArrayList;
@@ -44,6 +45,10 @@ public final class ModBlocks {
 	public static final Block ASSEMBLY_TABLE = register("assembly_table", AssemblyTableBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 			.strength(2.5F).requiresCorrectToolForDrops().sound(SoundType.WOOD));
+
+	public static final Block CAR_WORKBENCH = register("car_workbench", CarWorkbenchBlock::new,
+		BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+			.strength(3.0F).requiresCorrectToolForDrops().sound(SoundType.METAL));
 
 	public static final Block CAR_LIFT = register("car_lift", CarLiftBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.METAL)

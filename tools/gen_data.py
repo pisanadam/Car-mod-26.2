@@ -170,6 +170,10 @@ def gen_recipes():
           shaped(["SSS", "PCP", "PPP"],
                  {"S": S, "P": "#minecraft:planks", "C": "minecraft:crafting_table"},
                  mid("assembly_table"), 1, "building"))
+    write(out / "car_workbench.json",
+          shaped(["SSS", "SAS", "III"],
+                 {"S": S, "A": mid("assembly_table"), "I": "minecraft:iron_block"},
+                 mid("car_workbench"), 1, "building"))
     write(out / "car_lift.json",
           shaped(["SSS", "_P_", "SIS"],
                  {"S": S, "P": "minecraft:piston", "I": "minecraft:iron_block"},
@@ -264,6 +268,14 @@ def gen_blocks():
                      "side": tex("assembly_table_side"),
                      "bottom": tex("assembly_table_bottom")}})
     write(st / "assembly_table.json", {"variants": {"": {"model": f"{NS}:block/assembly_table"}}})
+
+    # --- araba yapma masası ---
+    write(b / "car_workbench.json", {
+        "parent": "minecraft:block/cube_bottom_top",
+        "textures": {"top": tex("car_workbench_top"),
+                     "side": tex("car_workbench_side"),
+                     "bottom": tex("assembly_table_bottom")}})
+    write(st / "car_workbench.json", {"variants": {"": {"model": f"{NS}:block/car_workbench"}}})
 
     # --- araç lifti ---
     write(b / "car_lift.json", {
@@ -404,6 +416,13 @@ UI_TR = {
     f"itemGroup.{NS}.main": "RealCars",
     f"gui.{NS}.modification": "Araç Modifiye",
     f"gui.{NS}.assembly": "Montaj Tezgahı",
+    f"gui.{NS}.workbench": "Araba Yapma Masası",
+    f"gui.{NS}.slot.chassis": "Şasi",
+    f"gui.{NS}.slot.engine": "Motor",
+    f"gui.{NS}.slot.transmission": "Şanzıman",
+    f"gui.{NS}.slot.wheels": "Tekerlek x4",
+    f"gui.{NS}.slot.seat": "Koltuk",
+    f"gui.{NS}.slot.windshield": "Ön Cam",
     f"gui.{NS}.tab.color": "Renk",
     f"gui.{NS}.tab.wheel": "Tekerlek",
     f"gui.{NS}.tab.spoiler": "Rüzgarlık",
@@ -452,6 +471,13 @@ UI_EN = {
     f"itemGroup.{NS}.main": "RealCars",
     f"gui.{NS}.modification": "Vehicle Tuning",
     f"gui.{NS}.assembly": "Assembly Table",
+    f"gui.{NS}.workbench": "Car Workbench",
+    f"gui.{NS}.slot.chassis": "Chassis",
+    f"gui.{NS}.slot.engine": "Engine",
+    f"gui.{NS}.slot.transmission": "Gearbox",
+    f"gui.{NS}.slot.wheels": "Wheels x4",
+    f"gui.{NS}.slot.seat": "Seat",
+    f"gui.{NS}.slot.windshield": "Windshield",
     f"gui.{NS}.tab.color": "Colour",
     f"gui.{NS}.tab.wheel": "Wheels",
     f"gui.{NS}.tab.spoiler": "Spoiler",

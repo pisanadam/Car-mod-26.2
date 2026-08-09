@@ -8,6 +8,7 @@ import com.pisanadam.realcars.client.input.CarRideHandler;
 import com.pisanadam.realcars.client.render.CarEntityRenderer;
 import com.pisanadam.realcars.client.render.CarMeshFactory;
 import com.pisanadam.realcars.client.screen.CarModificationScreen;
+import com.pisanadam.realcars.client.screen.CarWorkbenchScreen;
 import com.pisanadam.realcars.client.sound.CarSoundManager;
 import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.registry.ModEntities;
@@ -35,6 +36,7 @@ public class RealCarsClient implements ClientModInitializer {
 		CarKeyBindings.init();
 
 		MenuScreens.register(ModMenus.CAR_MODIFICATION, CarModificationScreen::new);
+		MenuScreens.register(ModMenus.CAR_WORKBENCH, CarWorkbenchScreen::new);
 
 		// Gösterge listenin en sonuna, yani her şeyin üstüne eklenir. Vanilla
 		// bir öğeye iliştirmek cazip görünüyor ama o öğe gizlendiğinde (örneğin

@@ -124,6 +124,23 @@ public final class ModItems {
 		return CARS.get(model);
 	}
 
+	/** Verilen yığın bir şasi mi? Araba masasındaki yuva kısıtları bunu kullanır. */
+	public static boolean isChassis(final ItemStack stack) {
+		return CHASSIS.containsValue(stack.getItem());
+	}
+
+	public static boolean isEngine(final ItemStack stack) {
+		return ENGINES.containsValue(stack.getItem());
+	}
+
+	public static boolean isTransmission(final ItemStack stack) {
+		return TRANSMISSIONS.containsValue(stack.getItem());
+	}
+
+	public static boolean isWheel(final ItemStack stack) {
+		return WHEELS.containsValue(stack.getItem());
+	}
+
 	public static Item wheel(final WheelType wheel) {
 		return WHEELS.get(wheel);
 	}

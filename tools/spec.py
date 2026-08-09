@@ -178,6 +178,7 @@ CHASSIS = {
 
 BLOCKS = {
     "assembly_table":   ("Montaj Tezgahı", "Assembly Table"),
+    "car_workbench":    ("Araba Yapma Masası", "Car Workbench"),
     "car_lift":         ("Araç Lifti", "Car Lift"),
     "fuel_pump":        ("Yakıt Pompası", "Fuel Pump"),
     "asphalt":          ("Asfalt", "Asphalt"),

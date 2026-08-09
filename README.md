@@ -44,13 +44,21 @@ havası istersen **Montaj Tezgahı** da aynı işi görür.
 | Şasi | 8 çelik levha + ortada sınıfa özgü blok |
 | Araç Koltuğu | Deri + yün + çelik |
 | Ön Cam | 6 cam panel + 3 çelik |
+| Araba Yapma Masası | 4 çelik levha + montaj tezgahı + 3 demir bloğu |
 
 Tam listeyi oyun içindeki **tarif kitabından** görebilirsin — hepsi normal tarif
 olarak kayıtlı.
 
 ### 2. Arabayı craftla
 
-Bütün arabalar aynı 3×3 kalıbı kullanır:
+En kolay yol **Araba Yapma Masası**: her parçanın kendi gözü var — şasi, motor,
+şanzıman, tekerlek (dört adet), koltuk ve ön cam. Hangi gözün ne olduğu üstüne
+gelince yazılır, doğru bileşimi koyunca çıkacak araba sağdaki gözde belirir.
+Hangi arabanın çıkacağına masa kendi karar vermez; parçaları aracın gerçek
+kalıbına dizip tariflere sorar, yani tariflerle her zaman tutarlıdır.
+
+İstersen sıradan bir çalışma tezgahında (ya da **Montaj Tezgahı**'nda) da
+yapabilirsin. Bütün arabalar aynı 3×3 kalıbı kullanır:
 
 ```
 tekerlek | ön cam  | tekerlek

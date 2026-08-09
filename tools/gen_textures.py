@@ -438,6 +438,28 @@ def gen_blocks():
     c.noise(0, 0, 16, 16, 7, seed=26)
     c.save(out / "assembly_table_bottom.png")
 
+    # araba yapma masası: koyu çelik tezgah, üstünde araç şablonu
+    c = Canvas(16, 16)  # yan
+    c.rect(0, 0, 16, 16, (74, 78, 86))
+    c.noise(0, 0, 16, 16, 6, seed=41)
+    c.rect(0, 3, 16, 2, (44, 46, 52))
+    c.rect(0, 11, 16, 2, (44, 46, 52))
+    for i in range(2, 15, 4):
+        c.rect(i, 6, 2, 4, (156, 160, 168))
+    c.save(out / "car_workbench_side.png")
+
+    c = Canvas(16, 16)  # üst — tepeden araç şeması
+    c.rect(0, 0, 16, 16, (96, 100, 108))
+    c.noise(0, 0, 16, 16, 8, seed=42)
+    c.outline_rect(0, 0, 16, 16, (58, 60, 66))
+    c.rect(5, 2, 6, 12, (188, 192, 200))
+    c.rect(6, 4, 4, 3, (52, 78, 110))
+    c.rect(6, 9, 4, 3, (52, 78, 110))
+    for y in (3, 11):
+        c.rect(3, y, 2, 2, (30, 30, 32))
+        c.rect(11, y, 2, 2, (30, 30, 32))
+    c.save(out / "car_workbench_top.png")
+
     # araç lifti
     c = Canvas(16, 16)  # yan
     c.rect(0, 0, 16, 16, (58, 60, 66))
@@ -571,6 +593,21 @@ def gen_gui():
     for col in range(9):
         _slot(c, 7 + col * 18, 141)
     c.save(out / "assembly_table.png")
+
+    # --- araba yapma masası ekranı ---
+    # Altı girdi yuvası tek sıra: şasi, motor, şanzıman, tekerlek, koltuk, ön cam
+    c = Canvas(256, 256)
+    _panel(c, 0, 0, 176, 166)
+    for col in range(6):
+        _slot(c, 7 + col * 18, 34)
+    _arrow(c, 120, 34)
+    _slot(c, 144, 34)
+    for row in range(3):
+        for col in range(9):
+            _slot(c, 7 + col * 18, 83 + row * 18)
+    for col in range(9):
+        _slot(c, 7 + col * 18, 141)
+    c.save(out / "car_workbench.png")
 
     # sekme ikonları (renk / tekerlek / rüzgarlık / motor)
     icons = Canvas(64, 16)

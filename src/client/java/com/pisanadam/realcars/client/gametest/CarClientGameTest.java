@@ -5,6 +5,7 @@ import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
 import com.pisanadam.realcars.registry.ModEntities;
+import com.pisanadam.realcars.menu.CarWorkbenchMenu;
 import com.pisanadam.realcars.registry.ModItems;
 import com.pisanadam.realcars.client.input.CarKeyBindings;
 import com.pisanadam.realcars.client.sound.CarSoundManager;
@@ -123,21 +124,67 @@ public class CarClientGameTest implements FabricClientGameTest {
 		server.runCommand("setblock 0 " + GROUND_Y + " 0 realcars:assembly_table");
 		server.runCommand("tp @a 0 " + (GROUND_Y + 1) + " -2 0 20");
 		context.waitTicks(10);
-		openBlockAt(context, 0, "Montaj Tezgahı");
+		openBlockAt(context, 0, "Montaj Tezgahı", true);
+
+		// Araba yapma masası: açılmalı ve parçalar konunca araba vermeli.
+		server.runCommand("setblock 0 " + GROUND_Y + " 0 realcars:car_workbench");
+		context.waitTicks(5);
+		// Ekran açık bırakılır: parça kontrolü ve fotoğrafı menü açıkken yapılır.
+		openBlockAt(context, 0, "Araba Yapma Masası", false);
+		checkWorkbenchBuildsCar(context, singleplayer);
 
 		// Lift: yanında araç varken modifiye ekranını açmalı.
 		server.runCommand("setblock 0 " + GROUND_Y + " 0 realcars:car_lift");
 		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_COROLLA, 2.0D, 0.0D, 90.0F));
 		context.waitTicks(10);
-		openBlockAt(context, 0, "Araç Lifti");
+		openBlockAt(context, 0, "Araç Lifti", true);
 
 		server.runCommand("setblock 0 " + GROUND_Y + " 0 air");
 		server.runCommand("kill @e[type=!player]");
 		context.waitTicks(5);
 	}
 
+	/**
+	 * Araba yapma masasına parçaları koyunca sonuç gözünde doğru arabanın
+	 * belirdiğini sınar.
+	 *
+	 * <p>Masa hangi arabanın çıkacağını kendi bilmez; parçaları aracın gerçek
+	 * kalıbına dizip tarif yöneticisine sorar. Bu sınama, o köprünün çalıştığını
+	 * ve masanın tariflerle tutarlı kaldığını gösterir.
+	 */
+	private static void checkWorkbenchBuildsCar(final ClientGameTestContext context,
+												final TestSingleplayerContext singleplayer) {
+		final CarModel model = CarModel.CAR_BMW_M3;
+		singleplayer.getServer().runOnServer(unused -> {
+			final var player = singleplayer.getConnection().getServerPlayer();
+			if (!(player.containerMenu instanceof CarWorkbenchMenu menu)) {
+				throw new AssertionError("Araba yapma masası menüsü açılmadı: " + player.containerMenu);
+			}
+			menu.getSlot(CarWorkbenchMenu.SLOT_CHASSIS)
+				.set(new ItemStack(ModItems.chassis(model.chassis())));
+			menu.getSlot(CarWorkbenchMenu.SLOT_ENGINE)
+				.set(new ItemStack(ModItems.engine(model.defaultEngine())));
+			menu.getSlot(CarWorkbenchMenu.SLOT_TRANSMISSION)
+				.set(new ItemStack(ModItems.transmission(model.defaultTransmission())));
+			menu.getSlot(CarWorkbenchMenu.SLOT_WHEELS)
+				.set(new ItemStack(ModItems.wheel(model.defaultWheel()), CarWorkbenchMenu.WHEELS_NEEDED));
+			menu.getSlot(CarWorkbenchMenu.SLOT_SEAT).set(new ItemStack(ModItems.CAR_SEAT));
+			menu.getSlot(CarWorkbenchMenu.SLOT_WINDSHIELD).set(new ItemStack(ModItems.WINDSHIELD));
+
+			final ItemStack built = menu.getSlot(CarWorkbenchMenu.RESULT_SLOT).getItem();
+			if (!built.is(ModItems.car(model))) {
+				throw new AssertionError("Masa yanlış sonuç veriyor: " + built);
+			}
+		});
+		context.waitTicks(10);
+		context.takeScreenshot("98-araba-masasi");
+		context.setScreen(() -> null);
+		context.waitTicks(5);
+	}
+
 	/** Verilen bloğa bakıp sağ tıklar ve bir ekranın açıldığını doğrular. */
-	private static void openBlockAt(final ClientGameTestContext context, final int x, final String label) {
+	private static void openBlockAt(final ClientGameTestContext context, final int x, final String label,
+									final boolean closeAfter) {
 		context.getInput().lookAt(new BlockPos(x, GROUND_Y, 0));
 		context.waitTicks(5);
 		context.getInput().pressKey(options -> options.keyUse);
@@ -146,8 +193,10 @@ public class CarClientGameTest implements FabricClientGameTest {
 		if (!opened) {
 			throw new AssertionError(label + " sağ tıklanınca açılmadı");
 		}
-		context.setScreen(() -> null);
-		context.waitTicks(5);
+		if (closeAfter) {
+			context.setScreen(() -> null);
+			context.waitTicks(5);
+		}
 	}
 
 	/** Araçların bulunduğu bölgeyi kapsayan arama kutusu. */
