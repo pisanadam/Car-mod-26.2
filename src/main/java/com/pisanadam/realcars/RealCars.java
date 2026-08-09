@@ -1,5 +1,7 @@
 package com.pisanadam.realcars;
 
+import com.pisanadam.realcars.command.RecipeCommand;
+import com.pisanadam.realcars.recipe.ModRecipeBook;
 import com.pisanadam.realcars.registry.ModBlocks;
 import com.pisanadam.realcars.registry.ModComponents;
 import com.pisanadam.realcars.registry.ModEntities;
@@ -31,6 +33,8 @@ public class RealCars implements ModInitializer {
 		ModItems.init();
 		ModMenus.init();
 		ModNetworking.init();
+		ModRecipeBook.init();
+		RecipeCommand.init();
 		LOGGER.info("RealCars yüklendi.");
 	}
 }

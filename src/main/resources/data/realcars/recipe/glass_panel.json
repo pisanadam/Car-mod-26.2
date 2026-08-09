@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
+  "show_notification": false,
   "key": {
     "G": "minecraft:glass"
   },

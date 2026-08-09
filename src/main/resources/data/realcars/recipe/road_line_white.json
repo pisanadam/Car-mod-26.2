@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
+  "show_notification": false,
   "key": {
     "A": "realcars:asphalt",
     "D": "minecraft:white_dye"

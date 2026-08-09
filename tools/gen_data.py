@@ -42,6 +42,9 @@ def shaped(pattern, key, result, count=1, category="misc"):
     return {
         "type": "minecraft:crafting_shaped",
         "category": category,
+        # Tarifler oyuncuya girişte topluca açılıyor (ModRecipeBook); bildirim
+        # açık kalsaydı ilk girişte altmış küsur "tarif açıldı" balonu düşerdi.
+        "show_notification": False,
         "key": key,
         "pattern": [row.replace("_", " ") for row in pattern],
         "result": {"id": result, **({"count": count} if count != 1 else {})},
@@ -52,6 +55,7 @@ def shapeless(ingredients, result, count=1, category="misc"):
     return {
         "type": "minecraft:crafting_shapeless",
         "category": category,
+        "show_notification": False,
         "ingredients": ingredients,
         "result": {"id": result, **({"count": count} if count != 1 else {})},
     }
@@ -459,6 +463,14 @@ UI_TR = {
     f"message.{NS}.help.horn": "%s — korna",
     f"message.{NS}.help.dismount": "%s — araçtan in",
     f"message.{NS}.help.passenger": "Yolcu koltuğundasın: aracı ilk binen kişi sürer.",
+    f"command.{NS}.recipes.title": "— RealCars tarifleri (%s) —",
+    f"command.{NS}.recipes.hint": "Bir ada tıkla, yapılışı burada yazsın. Hepsi tarif kitabında da açık.",
+    f"command.{NS}.recipes.click": "Yapılışını göster",
+    f"command.{NS}.recipes.header": "%s x%s",
+    f"command.{NS}.recipes.shapeless": "Sıra önemsiz — bunları tezgaha koy:",
+    f"command.{NS}.recipes.other": "Bu tarif çalışma tezgahında yapılmıyor.",
+    f"command.{NS}.recipes.unknown": "\"%s\" için tarif yok. Listeyi görmek için: /cars recipes",
+    f"command.{NS}.recipes.empty": "Sunucuda RealCars tarifi yüklü değil.",
     f"tooltip.{NS}.top_speed": "Azami hız: %s km/s",
     f"tooltip.{NS}.engine": "Motor: %s",
     f"tooltip.{NS}.transmission": "Şanzıman: %s",
@@ -518,6 +530,14 @@ UI_EN = {
     f"message.{NS}.help.horn": "%s \u2014 horn",
     f"message.{NS}.help.dismount": "%s \u2014 get out",
     f"message.{NS}.help.passenger": "You are in the passenger seat: whoever got in first drives.",
+    f"command.{NS}.recipes.title": "— RealCars recipes (%s) —",
+    f"command.{NS}.recipes.hint": "Click a name to see how it is made. They are all unlocked in the recipe book too.",
+    f"command.{NS}.recipes.click": "Show how it is made",
+    f"command.{NS}.recipes.header": "%s x%s",
+    f"command.{NS}.recipes.shapeless": "Order does not matter — put these on the bench:",
+    f"command.{NS}.recipes.other": "This recipe is not made on a crafting table.",
+    f"command.{NS}.recipes.unknown": "No recipe for \"%s\". For the list: /cars recipes",
+    f"command.{NS}.recipes.empty": "No RealCars recipes are loaded on this server.",
     f"tooltip.{NS}.top_speed": "Top speed: %s km/h",
     f"tooltip.{NS}.engine": "Engine: %s",
     f"tooltip.{NS}.transmission": "Gearbox: %s",

@@ -95,6 +95,14 @@ for item in $ITEMS; do
 done
 sleep 4
 
+# --- tarif komutu -------------------------------------------------------
+# Konsolda çeviri dosyası olmadığı için başlıklar ham anahtar olarak düşer;
+# ızgara satırları ise düz metin, onları arayarak komutun çalıştığı görülür.
+send "cars recipes asphalt"
+send "cars recipes rubber"
+send "cars recipes"
+sleep 3
+
 send "stop"
 
 echo "Sunucunun kapanması bekleniyor..."
@@ -116,6 +124,22 @@ fail=0
 if [ "$spawned" -ne "$expected" ]; then
 	echo "HATA: bazı araçlar spawn edilemedi."
 	grep -iE 'Unable to summon|No entity type' "$LOG" | head -10
+	fail=1
+fi
+
+# /cars recipes gerçekten ızgara bastı mı?
+if grep -qF '[A][A][A]' "$LOG"; then
+	echo "Tarif komutu: asfalt ızgarası basıldı."
+else
+	echo "HATA: /cars recipes asphalt ızgara basmadı."
+	grep -iE 'cars recipes|Unknown command' "$LOG" | head -5
+	fail=1
+fi
+# Konsol çeviriyi çözebiliyorsa metin, çözemiyorsa ham anahtar düşer; ikisi de olur.
+if grep -qE 'command\.realcars\.recipes\.shapeless|Order does not matter' "$LOG"; then
+	echo "Tarif komutu: şekilsiz tarif (kauçuk) listelendi."
+else
+	echo "HATA: /cars recipes rubber şekilsiz tarifi listelemedi."
 	fail=1
 fi
 

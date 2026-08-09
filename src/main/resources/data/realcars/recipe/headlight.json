@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
+  "show_notification": false,
   "key": {
     "G": "realcars:glass_panel",
     "L": "minecraft:glowstone_dust",

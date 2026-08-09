@@ -1,9 +1,11 @@
 package com.pisanadam.realcars.client.gametest;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.pisanadam.realcars.entity.CarEntity;
 import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
+import com.pisanadam.realcars.recipe.ModRecipeBook;
 import com.pisanadam.realcars.registry.ModEntities;
 import com.pisanadam.realcars.menu.CarWorkbenchMenu;
 import com.pisanadam.realcars.registry.ModItems;
@@ -65,6 +67,8 @@ public class CarClientGameTest implements FabricClientGameTest {
 			context.takeScreenshot("01-tum-araclar");
 
 			checkRecipesLoaded(singleplayer);
+			checkRecipesUnlocked(singleplayer);
+			checkRecipeCommand(singleplayer);
 			checkBlocksOpen(context, singleplayer);
 			portraitOfEveryCar(context, singleplayer);
 			showcase(context, singleplayer);
@@ -105,6 +109,56 @@ public class CarClientGameTest implements FabricClientGameTest {
 				if (!result.get().is(expected)) {
 					throw new AssertionError(model.itemName() + " tarifi yanlış araç veriyor: "
 						+ result.get());
+				}
+			}
+		});
+	}
+
+	/**
+	 * Tariflerin oyuncuya kendiliğinden açıldığını doğrular.
+	 *
+	 * <p>Oyuncu dünyaya yeni girdi ve elinde tek bir araba parçası yok; buna
+	 * rağmen modun bütün tarifleri tarif kitabında açık olmalı. Kitap sunucu
+	 * tarafında tutulduğu için doğrudan oraya bakılır: {@code known} kümesinde
+	 * eksik bir tarif varsa {@code ModRecipeBook} kancası çalışmamış demektir.
+	 */
+	private static void checkRecipesUnlocked(final TestSingleplayerContext singleplayer) {
+		singleplayer.getServer().runOnServer(server -> {
+			final var player = singleplayer.getConnection().getServerPlayer();
+			final var book = player.getRecipeBook();
+			final var recipes = ModRecipeBook.modRecipes(server);
+			if (recipes.isEmpty()) {
+				throw new AssertionError("sunucuda hiç realcars tarifi yok");
+			}
+			for (final var holder : recipes) {
+				if (!book.contains(holder.id())) {
+					throw new AssertionError("tarif kitabında açılmamış: " + holder.id().identifier());
+				}
+			}
+		});
+	}
+
+	/**
+	 * {@code /cars recipes} komutunun kayıtlı ve çalışır olduğunu sınar.
+	 *
+	 * <p>Komut doğrudan Brigadier üzerinden çalıştırılır: dönen sayı eşleşen
+	 * tarif adedidir, sıfırsa komut kayıtlı ama arama yolu bozuk demektir.
+	 * Bilinmeyen bir komut ise zaten istisna fırlatıp testi düşürür.
+	 */
+	private static void checkRecipeCommand(final TestSingleplayerContext singleplayer) {
+		singleplayer.getServer().runOnServer(server -> {
+			final var dispatcher = server.getCommands().getDispatcher();
+			final var source = server.createCommandSourceStack();
+			for (final String command : List.of("cars recipes asphalt", "cars recipes",
+					"realcars recipes car_bmw_m3", "recipe cars rubber")) {
+				final int matched;
+				try {
+					matched = dispatcher.execute(command, source);
+				} catch (final CommandSyntaxException failure) {
+					throw new AssertionError("/" + command + " çalıştırılamadı", failure);
+				}
+				if (matched < 1) {
+					throw new AssertionError("/" + command + " hiçbir tarif bulamadı");
 				}
 			}
 		});

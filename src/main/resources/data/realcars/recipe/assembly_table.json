@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "building",
+  "show_notification": false,
   "key": {
     "S": "realcars:steel_plate",
     "P": "#minecraft:planks",

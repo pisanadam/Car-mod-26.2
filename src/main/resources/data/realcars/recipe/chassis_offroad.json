@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
+  "show_notification": false,
   "key": {
     "S": "realcars:steel_plate",
     "I": "minecraft:iron_block"

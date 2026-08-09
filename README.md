@@ -46,8 +46,26 @@ havası istersen **Montaj Tezgahı** da aynı işi görür.
 | Ön Cam | 6 cam panel + 3 çelik |
 | Araba Yapma Masası | 4 çelik levha + montaj tezgahı + 3 demir bloğu |
 
-Tam listeyi oyun içindeki **tarif kitabından** görebilirsin — hepsi normal tarif
-olarak kayıtlı.
+Tam listeyi oyun içindeki **tarif kitabından** görebilirsin. Modun bütün
+tarifleri, dünyaya girdiğin anda kitabına açılmış olarak gelir: elinde tek bir
+parça olmasa bile hepsi listede durur ve yapılışını görebilirsin.
+
+Kitabı açmadan bakmak istersen **`/cars recipes`** komutu var:
+
+| Komut | Ne yapar |
+|---|---|
+| `/cars recipes` | Modun ürettiği her şeyin listesi; bir ada tıklayınca yapılışı yazılır |
+| `/cars recipes asphalt` | Tek bir eşyanın tarifi, 3×3 ızgara olarak |
+| `/recipe cars ...` | Aynısı, vanilla `/recipe` komutunun altından (yetkili oyuncu için) |
+
+```
+Asfalt x8
+  [A][A][A]
+  [A][B][A]
+  [A][A][A]
+  A = Çakıl
+  B = Kömür Bloğu
+```
 
 ### 2. Arabayı craftla
 
@@ -286,7 +304,9 @@ JAVA_HOME=<jdk25> tools/smoke_test.sh # başsız sunucuda 12 aracı spawn edip g
 # Oyunu gerçekten açan görsel test: dünya kurar, on iki aracın her birini tek
 # tek yandan ve 3/4 açıdan fotoğraflar, sonra bir tanesine binip hızlanmayı,
 # virajda yatmayı, frende burun dalmasını ve stop lambalarını sayılarla
-# doğrular. Görüntüler build/run/clientGametest/screenshots altına düşer.
+# doğrular. Ayrıca yeni giren oyuncunun tarif kitabında modun bütün tariflerinin
+# açık olduğunu ve /cars recipes komutunun çalıştığını sınar.
+# Görüntüler build/run/clientGametest/screenshots altına düşer.
 JAVA_HOME=<jdk25> ./gradlew runClientGametest
 # Başsız bir makinede (yazılım OpenGL ile):
 LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x720x24" \

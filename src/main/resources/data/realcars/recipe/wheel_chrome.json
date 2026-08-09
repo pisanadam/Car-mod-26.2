@@ -1,6 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
+  "show_notification": false,
   "key": {
     "R": "realcars:rubber",
     "Q": "minecraft:quartz"
