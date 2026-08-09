@@ -63,6 +63,8 @@ public class FuelPumpBlock extends HorizontalDirectionalBlock {
 		}
 		final CarEntity car = CarLiftBlock.findNearestCar(level, pos);
 		if (car == null) {
+			// Sessizce hiçbir şey yapmamak "blok bozuk" gibi görünüyor.
+			player.sendOverlayMessage(Component.translatable("message.realcars.no_car_nearby"));
 			return InteractionResult.CONSUME;
 		}
 
@@ -76,6 +78,7 @@ public class FuelPumpBlock extends HorizontalDirectionalBlock {
 		final int coalNeeded = (int) Math.ceil(missing / FUEL_PER_COAL);
 		final int coalAvailable = player.getAbilities().instabuild ? coalNeeded : countCoal(player);
 		if (coalAvailable <= 0) {
+			player.sendOverlayMessage(Component.translatable("message.realcars.no_coal"));
 			return InteractionResult.CONSUME;
 		}
 

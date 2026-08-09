@@ -102,6 +102,9 @@ binenin tuşları direksiyona karışmaz.
 - **İngiliz Anahtarı** elindeyken arabaya sağ tıkla, ya da
 - **Araç Lifti** bloğunu arabanın yanına koyup lifte sağ tıkla.
 
+Lift ve **Yakıt Pompası** yalnızca yanlarında araç varken iş görür; araç yoksa
+ekranın altında bunu söylerler.
+
 Açılan ekranda dört sekme var: **Renk**, **Tekerlek**, **Rüzgarlık**,
 **Motor ve Şanzıman**. Solda araba dönerek gösterilir ve yaptığın her değişiklik
 anında yansır.
@@ -202,6 +205,10 @@ parlıyorlar.
 - **Motor sesi devirle değişir.** Ses dosyaları sentezle üretildi; her motor tipi
   kendi ateşleme mertebesini vurguluyor, bu yüzden V8 ile 4 silindir kulakta
   gerçekten farklı duyuluyor.
+- **Yokuş çıkar, hendeğe düşmez.** Araç bir bloklık basamakları ve merdivenleri
+  tırmanır. Çarpışma kutusu aracın uzunluğunu kapsamadığı için dar bir boşluğa
+  sığar; bu yüzden zemin desteği kutuya değil gerçek aks konumlarına bakılarak
+  belirlenir — iki aksdan biri karadaysa araç boşluğa köprü kurar, düşmez.
 - **Gösterge yalan söylemez.** Hız, tick içinde gerçekten alınan yola göre
   düzeltilir. Duvara dayanmış araç sıfır gösterir, çamurda patinaj yaparken de
   gerçekte ne kadar ilerliyorsan onu.

@@ -34,6 +34,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -100,6 +101,8 @@ public class CarEntity extends VehicleEntity {
 	private float prevSpeedKmh;
 	private float longAccel;
 	private float lateralLoad;
+	/** Çarpışma kutusu boşlukta ama akslar karada: araç boşluğa köprü kuruyor. */
+	private boolean bridging;
 	/** İstemcide yerel oyuncunun tuş durumu; sunucuda kullanılmaz. */
 	private Input clientInput = Input.EMPTY;
 
@@ -250,6 +253,7 @@ public class CarEntity extends VehicleEntity {
 			final double beforeX = this.getX();
 			final double beforeZ = this.getZ();
 			this.move(MoverType.SELF, this.getDeltaMovement());
+			this.settleOnAxles();
 			this.clampSpeedToActualTravel(beforeX, beforeZ);
 			this.publishState();
 		} else if (!this.level().isClientSide()) {
@@ -382,10 +386,19 @@ public class CarEntity extends VehicleEntity {
 			-MAX_BLOCKS_PER_TICK, MAX_BLOCKS_PER_TICK);
 		final float yawRad = this.getYRot() * Mth.DEG_TO_RAD;
 		double vy = this.getDeltaMovement().y;
-		// Yerdeyken de küçük bir aşağı hız gerekir: dikey hız tam sıfır olursa
-		// move() zemine bastırmaz ve bir sonraki tick onGround yanlış çıkar.
-		// Araç bir tick yerde bir tick havada sayılır, ivme ve tutuş yarıya iner.
-		vy = airborne ? vy - 0.08D : -0.08D;
+		if (airborne) {
+			vy -= 0.08D;
+		} else if (this.bridging) {
+			// Kutu boşlukta ama akslardan biri karada: araç boşluğa köprü
+			// kurar, aşağı çekilmez.
+			vy = 0.0D;
+		} else {
+			// Yerdeyken de küçük bir aşağı hız gerekir: dikey hız tam sıfır
+			// olursa move() zemine bastırmaz ve bir sonraki tick onGround
+			// yanlış çıkar. Araç bir tick yerde bir tick havada sayılır,
+			// ivme ve tutuş yarı yarıya düşer.
+			vy = -0.08D;
+		}
 		this.setDeltaMovement(-Mth.sin(yawRad) * blocksPerTick, vy, Mth.cos(yawRad) * blocksPerTick);
 
 		// --- yakıt tüketimi ---
@@ -499,6 +512,62 @@ public class CarEntity extends VehicleEntity {
 	// ----------------------------------------------------------------------
 	// Zemin
 	// ----------------------------------------------------------------------
+
+	/**
+	 * Aracın tırmanabileceği en yüksek basamak (blok).
+	 *
+	 * <p>{@code Entity} varsayılanı sıfırdır, yani hiç geçersiz kılınmazsa araç
+	 * bir levhaya bile çıkamaz — yokuşun dibinde takılıp kalır. Bir tam blok
+	 * seçildi, çünkü Minecraft'ta yokuş bir blokluk basamaklardan oluşur; daha
+	 * büyük bir değer araca duvar tırmandırmaktan başka bir işe yaramazdı.
+	 * Vanilla da binilen hayvanlara aynı sınırı verir.
+	 */
+	@Override
+	public float maxUpStep() {
+		return 1.0F;
+	}
+
+	/**
+	 * Hareketten sonra, çarpışma kutusu boşluğa denk gelse bile akslardan biri
+	 * karadaysa aracı yere basıyor sayar.
+	 *
+	 * <p>Bunu tek bir yerde yapmak önemli: tutuş, fren sesi, toz partikülü ve
+	 * fizik hep {@code onGround()} okuyor. Her biri ayrı ayrı "aslında
+	 * destekleniyor" diye düşünmek zorunda kalırsa biri mutlaka unutulur.
+	 */
+	private void settleOnAxles() {
+		this.bridging = !this.onGround() && this.axlesSupported();
+		if (this.bridging) {
+			this.setOnGround(true);
+		}
+	}
+
+	/**
+	 * Ön ya da arka aksın altında zemin var mı?
+	 *
+	 * <p>Minecraft'ta çarpışma kutusu yatayda karedir ve aracın uzunluğunu
+	 * kapsamaz. Bu yüzden kutu, aracın gerçekte üstünden geçebileceği bir
+	 * boşluğa sığar ve araç düşmemesi gereken çukurlara düşer. Destek bu yüzden
+	 * kutuya değil gerçek aks konumlarına bakılarak belirlenir: iki aksdan biri
+	 * karadaysa araç boşluğa köprü kurar.
+	 */
+	private boolean axlesSupported() {
+		final float halfBase = this.model.body().wheelbase() / 32.0F;
+		final float yawRad = this.getYRot() * Mth.DEG_TO_RAD;
+		final double sin = Mth.sin(yawRad);
+		final double cos = Mth.cos(yawRad);
+		final double bottom = this.getBoundingBox().minY;
+		for (final double lz : new double[] {-halfBase, halfBase}) {
+			final double px = this.getX() - lz * sin;
+			final double pz = this.getZ() + lz * cos;
+			final AABB probe = new AABB(px - 0.3D, bottom - 0.55D, pz - 0.3D,
+				px + 0.3D, bottom - 0.02D, pz + 0.3D);
+			if (!this.level().noCollision(this, probe)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private BlockPos groundPos() {
 		return BlockPos.containing(this.getX(), this.getBoundingBox().minY - 0.15D, this.getZ());

@@ -5,6 +5,7 @@ import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
 import com.pisanadam.realcars.registry.ModEntities;
+import com.pisanadam.realcars.registry.ModItems;
 import com.pisanadam.realcars.client.input.CarKeyBindings;
 import com.pisanadam.realcars.client.sound.CarSoundManager;
 import com.pisanadam.realcars.registry.ModMenus;
@@ -14,6 +15,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.CameraType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -58,10 +63,91 @@ public class CarClientGameTest implements FabricClientGameTest {
 			context.waitTicks(40);
 			context.takeScreenshot("01-tum-araclar");
 
+			checkRecipesLoaded(singleplayer);
+			checkBlocksOpen(context, singleplayer);
 			portraitOfEveryCar(context, singleplayer);
 			showcase(context, singleplayer);
 			rideAndScreenshot(context, singleplayer);
 		}
+	}
+
+	/**
+	 * Tariflerin gerçekten yüklendiğini doğrular.
+	 *
+	 * <p>Tarif dosyasının var olması yüklendiği anlamına gelmez: bozuk bir
+	 * kalıp ya da olmayan bir etiket, tarifin sessizce atlanmasına yol açar
+	 * (bu modda ikisi de bir kere başa geldi). Bu yüzden her aracın parçaları
+	 * gerçek bir 3x3 tezgah girdisine dizilir ve sunucunun tarif yöneticisine
+	 * "bundan ne çıkar" diye sorulur. Beklenen araç çıkmıyorsa tarif ya
+	 * yüklenmemiştir ya da kalıbı tutmuyordur.
+	 */
+	private static void checkRecipesLoaded(final TestSingleplayerContext singleplayer) {
+		singleplayer.getServer().runOnServer(server -> {
+			final var level = singleplayer.getConnection().getServerLevel();
+			for (final CarModel model : CarModel.values()) {
+				final ItemStack wheel = new ItemStack(ModItems.wheel(model.defaultWheel()));
+				final CraftingInput input = CraftingInput.of(3, 3, List.of(
+					wheel, new ItemStack(ModItems.WINDSHIELD), wheel,
+					new ItemStack(ModItems.engine(model.defaultEngine())),
+					new ItemStack(ModItems.chassis(model.chassis())),
+					new ItemStack(ModItems.transmission(model.defaultTransmission())),
+					wheel, new ItemStack(ModItems.CAR_SEAT), wheel));
+
+				final var result = server.getRecipeManager()
+					.getRecipeFor(RecipeType.CRAFTING, input, level)
+					.map(holder -> holder.value().assemble(input));
+				if (result.isEmpty()) {
+					throw new AssertionError(model.itemName() + " için tarif yüklenmemiş: "
+						+ "parçalar tezgaha dizildi ama hiçbir tarif eşleşmedi");
+				}
+				final Item expected = ModItems.car(model);
+				if (!result.get().is(expected)) {
+					throw new AssertionError(model.itemName() + " tarifi yanlış araç veriyor: "
+						+ result.get());
+				}
+			}
+		});
+	}
+
+	/**
+	 * Blokların sağ tıklandığında gerçekten çalıştığını sınar.
+	 *
+	 * <p>Montaj tezgahının ekranı açması, aracın yanındaki liftin de modifiye
+	 * ekranını açması beklenir. Ekran görüntüsüyle değil, açılan ekranın
+	 * varlığına bakılarak doğrulanır.
+	 */
+	private static void checkBlocksOpen(final ClientGameTestContext context,
+										final TestSingleplayerContext singleplayer) {
+		final var server = singleplayer.getServer();
+		server.runCommand("kill @e[type=!player]");
+		server.runCommand("setblock 0 " + GROUND_Y + " 0 realcars:assembly_table");
+		server.runCommand("tp @a 0 " + (GROUND_Y + 1) + " -2 0 20");
+		context.waitTicks(10);
+		openBlockAt(context, 0, "Montaj Tezgahı");
+
+		// Lift: yanında araç varken modifiye ekranını açmalı.
+		server.runCommand("setblock 0 " + GROUND_Y + " 0 realcars:car_lift");
+		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_COROLLA, 2.0D, 0.0D, 90.0F));
+		context.waitTicks(10);
+		openBlockAt(context, 0, "Araç Lifti");
+
+		server.runCommand("setblock 0 " + GROUND_Y + " 0 air");
+		server.runCommand("kill @e[type=!player]");
+		context.waitTicks(5);
+	}
+
+	/** Verilen bloğa bakıp sağ tıklar ve bir ekranın açıldığını doğrular. */
+	private static void openBlockAt(final ClientGameTestContext context, final int x, final String label) {
+		context.getInput().lookAt(new BlockPos(x, GROUND_Y, 0));
+		context.waitTicks(5);
+		context.getInput().pressKey(options -> options.keyUse);
+		context.waitTicks(15);
+		final boolean opened = context.computeOnClient(client -> client.gui.screen() != null);
+		if (!opened) {
+			throw new AssertionError(label + " sağ tıklanınca açılmadı");
+		}
+		context.setScreen(() -> null);
+		context.waitTicks(5);
 	}
 
 	/** Araçların bulunduğu bölgeyi kapsayan arama kutusu. */
@@ -217,6 +303,79 @@ public class CarClientGameTest implements FabricClientGameTest {
 		if (context.computeOnClient(client -> client.options.getCameraType()) != CameraType.FIRST_PERSON) {
 			throw new AssertionError("İnince kamera eski hâline dönmedi");
 		}
+
+		checkSlopeAndGap(context, singleplayer);
+	}
+
+	/**
+	 * Aracın yokuş çıkabildiğini ve düşmemesi gereken boşluğa düşmediğini sınar.
+	 *
+	 * <p>Pistin üstüne üç basamaklı bir yokuş ve iki blok genişliğinde bir hendek
+	 * kurulur. Araç yokuşu çıkmalı (yükseklik artmalı), hendeğin üstünden ise
+	 * düşmeden geçmeli — çarpışma kutusu hendeğe sığdığı hâlde akslar iki yanda
+	 * karaya bastığı için.
+	 */
+	private static void checkSlopeAndGap(final ClientGameTestContext context,
+										 final TestSingleplayerContext singleplayer) {
+		final var server = singleplayer.getServer();
+		server.runCommand("kill @e[type=!player]");
+		server.runCommand("fill -96 " + (GROUND_Y - 1) + " -8 96 " + (GROUND_Y + 8)
+			+ " 8 air");
+		server.runCommand("fill -96 " + (GROUND_Y - 1) + " -8 96 " + (GROUND_Y - 1)
+			+ " 8 realcars:asphalt");
+		// Üç basamaklı yokuş ve üstünde düzlük
+		for (int step = 0; step < 3; step++) {
+			final int x = -70 + step;
+			server.runCommand("fill " + x + " " + GROUND_Y + " -8 " + x + " "
+				+ (GROUND_Y + step) + " 8 realcars:asphalt");
+		}
+		server.runCommand("fill -67 " + GROUND_Y + " -8 -50 " + (GROUND_Y + 2)
+			+ " 8 realcars:asphalt");
+		// Düzlüğün sonunda iki blok genişliğinde hendek
+		server.runCommand("fill -55 " + (GROUND_Y - 4) + " -8 -54 " + (GROUND_Y + 2)
+			+ " 8 air");
+
+		server.runOnServer(unused -> spawn(singleplayer, CarModel.CAR_COROLLA, -80.0D, 0.0D, -90.0F));
+		context.waitTicks(6);
+		mountByRightClick(context, singleplayer, -80);
+		context.getInput().pressKey(CarKeyBindings.ENGINE_TOGGLE);
+		context.waitTicks(10);
+
+		final float startY = load(context, car -> (float) car.getY());
+		context.getInput().holdKey(options -> options.keyUp);
+		context.waitTicks(90);
+		final float topY = load(context, car -> (float) car.getY());
+		final float topX = load(context, car -> (float) car.getX());
+		context.takeScreenshot("97-yokus");
+		System.out.printf("[RealCars] yokuş: y %.1f -> %.1f, x %.1f%n", startY, topY, topX);
+		if (topY - startY < 2.0F) {
+			throw new AssertionError("Araç yokuşu çıkamadı: y " + startY + " -> " + topY);
+		}
+
+		// Hendeğin üstünden geçiş. Yükseklik yalnızca hendeğin bulunduğu
+		// aralıkta ölçülür: düzlük -50'de bittiği için sonrasında araç zaten
+		// aşağı iner, o inişi hendeğe düşmekle karıştırmamak gerekir.
+		float lowestOverGap = topY;
+		float reachedX = topX;
+		for (int sample = 0; sample < 30; sample++) {
+			context.waitTicks(4);
+			reachedX = load(context, car -> (float) car.getX());
+			if (reachedX > -60.0F && reachedX < -52.0F) {
+				lowestOverGap = Math.min(lowestOverGap, load(context, car -> (float) car.getY()));
+			}
+			if (reachedX > -52.0F) {
+				break;
+			}
+		}
+		context.getInput().releaseKey(options -> options.keyUp);
+		System.out.printf("[RealCars] hendek üstünde en düşük y %.2f, ulaşılan x %.1f%n",
+			lowestOverGap, reachedX);
+		if (reachedX < -52.0F) {
+			throw new AssertionError("Araç hendeği geçemedi: x " + reachedX);
+		}
+		if (lowestOverGap < topY - 0.6F) {
+			throw new AssertionError("Araç hendeğe düştü: y " + topY + " -> " + lowestOverGap);
+		}
 	}
 
 	/**
@@ -240,7 +399,11 @@ public class CarClientGameTest implements FabricClientGameTest {
 		context.waitTicks(25);
 		final float reverse = load(context, CarEntity::speedKmh);
 		context.getInput().releaseKey(options -> options.keyDown);
+		// El freniyle temiz bir duruş: hızlanma ölçümü sıfırdan başlasın.
+		context.getInput().holdKey(options -> options.keyJump);
 		context.waitTicks(20);
+		context.getInput().releaseKey(options -> options.keyJump);
+		context.waitTicks(5);
 		if (reverse > -2.0F) {
 			throw new AssertionError("Geri tuşuna basılınca araç geri gitmedi: " + reverse + " km/s");
 		}
@@ -447,7 +610,9 @@ public class CarClientGameTest implements FabricClientGameTest {
 		final float angleBefore = load(context, car -> car.wheelAngle(1.0F));
 		final float x0 = load(context, car -> (float) car.getX());
 		final float z0 = load(context, car -> (float) car.getZ());
-		final int ticks = 20;
+		// Pencere kısa tutulur: açı +-3600 derecede sarmalandığı için ölçülen
+		// aralık 3600 dereceyi aşarsa sarmal ayırt edilemez hâle gelir.
+		final int ticks = 10;
 		context.waitTicks(ticks);
 		final boolean slipping = load(context, car -> car.wheelSlipping() ? 1.0F : 0.0F) > 0.5F;
 		context.getInput().holdKey(options -> options.keyUp);

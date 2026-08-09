@@ -5,6 +5,7 @@ import com.pisanadam.realcars.entity.CarEntity;
 import com.pisanadam.realcars.registry.ModMenus;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -41,6 +42,8 @@ public class CarLiftBlock extends Block {
 		}
 		final CarEntity car = findNearestCar(level, pos);
 		if (car == null) {
+			// Sessizce hiçbir şey yapmamak "blok bozuk" gibi görünüyor.
+			player.sendOverlayMessage(Component.translatable("message.realcars.no_car_nearby"));
 			return InteractionResult.CONSUME;
 		}
 		ModMenus.openModification(player, car);

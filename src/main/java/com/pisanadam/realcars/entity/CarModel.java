@@ -21,7 +21,7 @@ import net.minecraft.util.StringRepresentable;
 public enum CarModel implements StringRepresentable {
 	// --- Hatchback / Sedan -------------------------------------------------
 	CAR_GOLF_GTI("car_golf_gti", CarClass.HATCHBACK, 250, 6.2F, 1400, 50, 0xC71F24,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_COMPACT,
 		Body.of(Silhouette.HATCHBACK, 68.0F, 28.0F)
 			.stance(5.5F, 42.0F, 0.0F)
 			.nose(13.0F).cowl(-13.0F, 16.0F)
@@ -30,7 +30,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.80F, 1.2F)
 			.build()),
 	CAR_COROLLA("car_corolla", CarClass.SEDAN, 190, 10.4F, 1320, 50, 0xD8DCE2,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_STREET,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_STREET, ChassisType.CHASSIS_COMPACT,
 		Body.of(Silhouette.NOTCHBACK, 74.0F, 28.5F)
 			.stance(5.5F, 43.0F, 1.0F)
 			.nose(13.5F).cowl(-13.0F, 16.0F)
@@ -39,7 +39,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.80F, 1.1F)
 			.build()),
 	CAR_BMW_M3("car_bmw_m3", CarClass.SEDAN, 290, 4.1F, 1730, 59, 0x1B54A8,
-		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT,
+		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		Body.of(Silhouette.NOTCHBACK, 77.0F, 30.5F)
 			.stance(5.0F, 46.0F, 0.0F)
 			.nose(14.0F).cowl(-11.0F, 16.5F)
@@ -50,7 +50,7 @@ public enum CarModel implements StringRepresentable {
 
 	// --- Spor --------------------------------------------------------------
 	CAR_MUSTANG_GT("car_mustang_gt", CarClass.SPORT, 250, 4.3F, 1740, 61, 0x161A1F,
-		EngineType.ENGINE_V8, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT,
+		EngineType.ENGINE_V8, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		Body.of(Silhouette.FASTBACK, 77.0F, 31.0F)
 			.stance(5.0F, 44.0F, 2.0F)
 			.nose(14.0F).cowl(-8.0F, 16.0F)
@@ -59,7 +59,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.74F, 2.0F)
 			.build()),
 	CAR_GTR("car_gtr", CarClass.SPORT, 315, 2.9F, 1750, 74, 0x6E7682,
-		EngineType.ENGINE_V6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT,
+		EngineType.ENGINE_V6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		Body.of(Silhouette.FASTBACK, 75.0F, 30.5F)
 			.stance(4.5F, 44.5F, 1.0F)
 			.nose(13.0F).cowl(-9.0F, 15.5F)
@@ -68,7 +68,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.74F, 2.0F)
 			.build()),
 	CAR_PORSCHE_911("car_porsche_911", CarClass.SPORT, 300, 3.4F, 1520, 64, 0xE4E7EC,
-		EngineType.ENGINE_FLAT6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT,
+		EngineType.ENGINE_FLAT6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		// Arkada motor: burun alçak, tavan öne kaymış, sırt uzun ve kesintisiz.
 		Body.of(Silhouette.FASTBACK, 72.0F, 29.5F)
 			.stance(4.5F, 39.0F, 3.0F)
@@ -80,7 +80,7 @@ public enum CarModel implements StringRepresentable {
 
 	// --- Off-road / SUV / Pickup -------------------------------------------
 	CAR_WRANGLER("car_wrangler", CarClass.OFFROAD, 180, 7.6F, 1900, 70, 0x3E6B35,
-		EngineType.ENGINE_V6, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_OFFROAD,
+		EngineType.ENGINE_V6, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_OFFROAD, ChassisType.CHASSIS_OFFROAD,
 		Body.of(Silhouette.BOXY, 69.0F, 30.0F)
 			.stance(9.0F, 39.0F, 0.0F)
 			.nose(20.0F).cowl(-9.0F, 21.0F)
@@ -89,7 +89,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.86F, 2.4F)
 			.build()),
 	CAR_HILUX("car_hilux", CarClass.PICKUP, 175, 11.0F, 2050, 80, 0xE8EBEF,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_OFFROAD,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_OFFROAD, ChassisType.CHASSIS_OFFROAD,
 		Body.of(Silhouette.PICKUP, 85.0F, 30.0F)
 			.stance(9.0F, 49.5F, 0.0F)
 			.nose(19.0F).cowl(-11.0F, 22.0F)
@@ -98,7 +98,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.86F, 2.2F)
 			.build()),
 	CAR_DEFENDER("car_defender", CarClass.SUV, 190, 6.6F, 2320, 90, 0x8B8F7A,
-		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_OFFROAD,
+		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_AUTOMATIC, WheelType.WHEEL_OFFROAD, ChassisType.CHASSIS_OFFROAD,
 		Body.of(Silhouette.BOXY, 80.0F, 32.0F)
 			.stance(9.0F, 48.0F, 0.0F)
 			.nose(21.0F).cowl(-13.0F, 23.0F)
@@ -109,7 +109,7 @@ public enum CarModel implements StringRepresentable {
 
 	// --- Klasik / Kamyonet --------------------------------------------------
 	CAR_BEETLE("car_beetle", CarClass.CLASSIC, 130, 17.5F, 820, 40, 0x62A8D8,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_CLASSIC,
 		Body.of(Silhouette.ROUNDED, 65.0F, 25.0F)
 			.stance(6.0F, 38.0F, 0.0F)
 			.nose(11.0F).cowl(-11.0F, 15.0F)
@@ -119,7 +119,7 @@ public enum CarModel implements StringRepresentable {
 			.chrome()
 			.build()),
 	CAR_C10("car_c10", CarClass.PICKUP, 160, 9.0F, 1680, 76, 0x2E6B52,
-		EngineType.ENGINE_V8, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET,
+		EngineType.ENGINE_V8, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_CLASSIC,
 		Body.of(Silhouette.PICKUP, 85.0F, 32.0F)
 			.stance(7.5F, 51.0F, 0.0F)
 			.nose(18.0F).cowl(-12.0F, 21.0F)
@@ -129,7 +129,7 @@ public enum CarModel implements StringRepresentable {
 			.chrome()
 			.build()),
 	CAR_TRANSPORTER("car_transporter", CarClass.VAN, 105, 22.0F, 1180, 42, 0xC45A3A,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_VAN,
 		// Burunsuz: ön cam neredeyse ön aksın üstünde, yan duvar dimdik.
 		Body.of(Silhouette.FORWARD_CONTROL, 68.0F, 27.5F)
 			.stance(6.5F, 38.0F, -2.0F)
@@ -368,12 +368,13 @@ public enum CarModel implements StringRepresentable {
 	private final EngineType defaultEngine;
 	private final TransmissionType defaultTransmission;
 	private final WheelType defaultWheel;
+	private final ChassisType chassis;
 	private final Body body;
 
 	CarModel(final String name, final CarClass carClass, final int topSpeedKmh, final float accelSeconds,
 			 final int massKg, final int fuelCapacity, final int defaultColor,
 			 final EngineType defaultEngine, final TransmissionType defaultTransmission,
-			 final WheelType defaultWheel, final Body body) {
+			 final WheelType defaultWheel, final ChassisType chassis, final Body body) {
 		this.name = name;
 		this.carClass = carClass;
 		this.topSpeedKmh = topSpeedKmh;
@@ -384,6 +385,7 @@ public enum CarModel implements StringRepresentable {
 		this.defaultEngine = defaultEngine;
 		this.defaultTransmission = defaultTransmission;
 		this.defaultWheel = defaultWheel;
+		this.chassis = chassis;
 		this.body = body;
 	}
 
@@ -433,6 +435,11 @@ public enum CarModel implements StringRepresentable {
 
 	public WheelType defaultWheel() {
 		return this.defaultWheel;
+	}
+
+	/** Bu aracı yapmak için gereken şasi — tarifle birebir aynıdır. */
+	public ChassisType chassis() {
+		return this.chassis;
 	}
 
 	public Body body() {

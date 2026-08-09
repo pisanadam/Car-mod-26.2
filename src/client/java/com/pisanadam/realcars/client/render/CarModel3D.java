@@ -97,7 +97,11 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		this.brakelights.visible = state.braking;
 
 		final float spin = state.wheelAngle * Mth.DEG_TO_RAD;
-		final float steer = -state.steerAngle * MAX_STEER_DEGREES * Mth.DEG_TO_RAD;
+		// Model, çizim sırasında X ve Y'de aynalanıyor (scale(-1,-1,1)); Y ekseni
+		// etrafındaki dönüş de bu aynayla işaret değiştirir. Bu yüzden direksiyon
+		// açısı olduğu gibi verilir, eksiye çevrilmez — çevrilirse tekerlekler
+		// aracın döndüğü yönün tersine bakar.
+		final float steer = state.steerAngle * MAX_STEER_DEGREES * Mth.DEG_TO_RAD;
 		for (final CarMeshFactory.WheelPosition position : CarMeshFactory.WheelPosition.values()) {
 			for (final Map.Entry<WheelType, ModelPart> entry : this.wheels[position.ordinal()].entrySet()) {
 				final ModelPart wheel = entry.getValue();

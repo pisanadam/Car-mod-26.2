@@ -106,6 +106,8 @@
   "message.realcars.help.steer": "%s / %s — steer",
   "message.realcars.help.title": "— Driving a car —",
   "message.realcars.locked": "This vehicle is not yours",
+  "message.realcars.no_car_nearby": "No car nearby — park one next to this block",
+  "message.realcars.no_coal": "No coal in your inventory",
   "message.realcars.no_fuel": "Out of fuel! Refill with a fuel canister.",
   "message.realcars.refueled": "Vehicle refuelled",
   "message.realcars.tank_full": "Tank is already full",

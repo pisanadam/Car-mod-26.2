@@ -106,6 +106,8 @@
   "message.realcars.help.steer": "%s / %s — direksiyon",
   "message.realcars.help.title": "— Araba kullanımı —",
   "message.realcars.locked": "Bu araç sana ait değil",
+  "message.realcars.no_car_nearby": "Yakında araç yok — aracı bu bloğun yanına park et",
+  "message.realcars.no_coal": "Envanterinde kömür yok",
   "message.realcars.no_fuel": "Yakıt bitti! Yakıt bidonu ile doldur.",
   "message.realcars.refueled": "Araç yakıtı dolduruldu",
   "message.realcars.tank_full": "Depo zaten dolu",

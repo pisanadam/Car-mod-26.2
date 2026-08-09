@@ -8,7 +8,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.CraftingMenu;
+import com.pisanadam.realcars.menu.AssemblyMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,6 +20,9 @@ import org.jspecify.annotations.Nullable;
  * Montaj tezgahı — araç parçalarını ve arabaları birleştirmek için 3x3'lük bir
  * tezgah açar. Tarifler normal tariflerdir, yani sıradan bir çalışma tezgahında
  * da yapılabilirler; bu blok garajın çalışma noktasıdır.
+ *
+ * <p>Menü olarak vanilla tezgah menüsü değil {@link AssemblyMenu} kullanılır;
+ * sebebi orada anlatılıyor.
  */
 public class AssemblyTableBlock extends Block {
 	public static final MapCodec<AssemblyTableBlock> CODEC = simpleCodec(AssemblyTableBlock::new);
@@ -47,7 +50,7 @@ public class AssemblyTableBlock extends Block {
 	protected @Nullable MenuProvider getMenuProvider(final BlockState state, final Level level, final BlockPos pos) {
 		return new SimpleMenuProvider(
 			(containerId, inventory, player) ->
-				new CraftingMenu(containerId, inventory, ContainerLevelAccess.create(level, pos)),
+				new AssemblyMenu(containerId, inventory, ContainerLevelAccess.create(level, pos)),
 			TITLE);
 	}
 }
