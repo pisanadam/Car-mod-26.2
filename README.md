@@ -54,6 +54,12 @@ olarak kayıtlı.
 En kolay yol **Araba Yapma Masası**: her parçanın kendi gözü var — şasi, motor,
 şanzıman, tekerlek (dört adet), koltuk ve ön cam. Hangi gözün ne olduğu üstüne
 gelince yazılır, doğru bileşimi koyunca çıkacak araba sağdaki gözde belirir.
+
+Sağ üstte **on iki arabanın katalogu** durur. Bir arabanın üstüne gelince adı ve
+istediği parçalar listelenir; tıklarsan parçalar envanterinden alınıp gözlere
+dizilir. Eksik parça varsa hangisi olduğu ekranın altında yazar, yani neyi
+craftlaman gerektiğini görürsün.
+
 Hangi arabanın çıkacağına masa kendi karar vermez; parçaları aracın gerçek
 kalıbına dizip tariflere sorar, yani tariflerle her zaman tutarlıdır.
 

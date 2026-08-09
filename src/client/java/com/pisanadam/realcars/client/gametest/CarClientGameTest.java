@@ -154,27 +154,23 @@ public class CarClientGameTest implements FabricClientGameTest {
 	 */
 	private static void checkWorkbenchBuildsCar(final ClientGameTestContext context,
 												final TestSingleplayerContext singleplayer) {
-		final CarModel model = CarModel.CAR_BMW_M3;
+		// Katalogdan tıklama, her araç için parçaları dizip doğru arabayı vermeli.
+		// Oyuncu yaratıcı modda olduğu için parçalar envanterden aranmaz.
 		singleplayer.getServer().runOnServer(unused -> {
 			final var player = singleplayer.getConnection().getServerPlayer();
 			if (!(player.containerMenu instanceof CarWorkbenchMenu menu)) {
 				throw new AssertionError("Araba yapma masası menüsü açılmadı: " + player.containerMenu);
 			}
-			menu.getSlot(CarWorkbenchMenu.SLOT_CHASSIS)
-				.set(new ItemStack(ModItems.chassis(model.chassis())));
-			menu.getSlot(CarWorkbenchMenu.SLOT_ENGINE)
-				.set(new ItemStack(ModItems.engine(model.defaultEngine())));
-			menu.getSlot(CarWorkbenchMenu.SLOT_TRANSMISSION)
-				.set(new ItemStack(ModItems.transmission(model.defaultTransmission())));
-			menu.getSlot(CarWorkbenchMenu.SLOT_WHEELS)
-				.set(new ItemStack(ModItems.wheel(model.defaultWheel()), CarWorkbenchMenu.WHEELS_NEEDED));
-			menu.getSlot(CarWorkbenchMenu.SLOT_SEAT).set(new ItemStack(ModItems.CAR_SEAT));
-			menu.getSlot(CarWorkbenchMenu.SLOT_WINDSHIELD).set(new ItemStack(ModItems.WINDSHIELD));
-
-			final ItemStack built = menu.getSlot(CarWorkbenchMenu.RESULT_SLOT).getItem();
-			if (!built.is(ModItems.car(model))) {
-				throw new AssertionError("Masa yanlış sonuç veriyor: " + built);
+			for (final CarModel model : CarModel.values()) {
+				menu.clickMenuButton(player, model.ordinal());
+				final ItemStack built = menu.getSlot(CarWorkbenchMenu.RESULT_SLOT).getItem();
+				if (!built.is(ModItems.car(model))) {
+					throw new AssertionError("Katalogda " + model.itemName()
+						+ " seçilince çıkan araba yanlış: " + built);
+				}
 			}
+			// Son araba gözlerde kalsın ki fotoğrafta dolu görünsün.
+			menu.clickMenuButton(player, CarModel.CAR_BMW_M3.ordinal());
 		});
 		context.waitTicks(10);
 		context.takeScreenshot("98-araba-masasi");

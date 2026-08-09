@@ -1,9 +1,11 @@
 package com.pisanadam.realcars.menu;
 
+import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.registry.ModBlocks;
 import com.pisanadam.realcars.registry.ModItems;
 import com.pisanadam.realcars.registry.ModMenus;
 import java.util.List;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -14,6 +16,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -80,11 +83,11 @@ public class CarWorkbenchMenu extends AbstractContainerMenu {
 
 		for (int row = 0; row < 3; row++) {
 			for (int col = 0; col < 9; col++) {
-				this.addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+				this.addSlot(new Slot(inventory, col + row * 9 + 9, 8 + col * 18, 118 + row * 18));
 			}
 		}
 		for (int col = 0; col < 9; col++) {
-			this.addSlot(new Slot(inventory, col, 8 + col * 18, 142));
+			this.addSlot(new Slot(inventory, col, 8 + col * 18, 176));
 		}
 	}
 
@@ -130,6 +133,89 @@ public class CarWorkbenchMenu extends AbstractContainerMenu {
 	private ItemStack one(final int slot) {
 		final ItemStack stack = this.inputs.getItem(slot);
 		return stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
+	}
+
+	/**
+	 * Katalogdan bir arabaya tıklanınca o arabanın parçalarını oyuncunun
+	 * envanterinden alıp gözlere dizer.
+	 *
+	 * <p>Hangi parçanın gerektiğini araç tanımının kendisi söyler, yani katalog
+	 * tariflerle aynı kaynaktan beslenir. Eksik bir parça varsa dizim yine de
+	 * yapılır (elde ne varsa yerine konur) ve eksiğin adı oyuncuya söylenir —
+	 * böylece neyi craftlaması gerektiğini görür.
+	 */
+	@Override
+	public boolean clickMenuButton(final Player who, final int buttonId) {
+		final CarModel[] models = CarModel.values();
+		if (buttonId < 0 || buttonId >= models.length || !(who instanceof ServerPlayer)) {
+			return false;
+		}
+		final CarModel model = models[buttonId];
+		ItemStack missing = ItemStack.EMPTY;
+		for (final Requirement need : requirements(model)) {
+			if (!this.stock(who, need.slot(), need.item(), need.count()) && missing.isEmpty()) {
+				missing = new ItemStack(need.item());
+			}
+		}
+		this.inputs.setChanged();
+		who.sendOverlayMessage(missing.isEmpty()
+			? Component.translatable("message.realcars.parts_loaded")
+			: Component.translatable("message.realcars.missing_part", missing.getHoverName()));
+		return true;
+	}
+
+	/** Bir aracın hangi gözde neye ihtiyacı olduğu. */
+	public record Requirement(int slot, Item item, int count) {
+	}
+
+	/** Verilen aracın parça listesi — tarifle aynı bileşim. */
+	public static List<Requirement> requirements(final CarModel model) {
+		return List.of(
+			new Requirement(SLOT_CHASSIS, ModItems.chassis(model.chassis()), 1),
+			new Requirement(SLOT_ENGINE, ModItems.engine(model.defaultEngine()), 1),
+			new Requirement(SLOT_TRANSMISSION, ModItems.transmission(model.defaultTransmission()), 1),
+			new Requirement(SLOT_WHEELS, ModItems.wheel(model.defaultWheel()), WHEELS_NEEDED),
+			new Requirement(SLOT_SEAT, ModItems.CAR_SEAT, 1),
+			new Requirement(SLOT_WINDSHIELD, ModItems.WINDSHIELD, 1));
+	}
+
+	/**
+	 * Bir gözü istenen parçayla doldurur; başaramazsa false döner.
+	 * Gözde yanlış bir şey varsa oyuncuya geri verilir.
+	 */
+	private boolean stock(final Player who, final int slot, final Item item, final int count) {
+		final ItemStack current = this.inputs.getItem(slot);
+		if (current.is(item) && current.getCount() >= count) {
+			return true;
+		}
+		if (!current.isEmpty()) {
+			who.getInventory().placeItemBackInInventory(current);
+			this.inputs.setItem(slot, ItemStack.EMPTY);
+		}
+		if (who.getAbilities().instabuild) {
+			this.inputs.setItem(slot, new ItemStack(item, count));
+			return true;
+		}
+		final int taken = takeFromInventory(who, item, count);
+		if (taken > 0) {
+			this.inputs.setItem(slot, new ItemStack(item, taken));
+		}
+		return taken >= count;
+	}
+
+	/** Envanterden en çok {@code count} adet alır, gerçekten alınanı döndürür. */
+	private static int takeFromInventory(final Player who, final Item item, final int count) {
+		int remaining = count;
+		for (int index = 0; index < who.getInventory().getContainerSize() && remaining > 0; index++) {
+			final ItemStack stack = who.getInventory().getItem(index);
+			if (!stack.is(item)) {
+				continue;
+			}
+			final int move = Math.min(remaining, stack.getCount());
+			stack.shrink(move);
+			remaining -= move;
+		}
+		return count - remaining;
 	}
 
 	/** Araba alınınca parçaları harcar. */

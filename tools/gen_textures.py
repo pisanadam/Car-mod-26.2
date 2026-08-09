@@ -595,18 +595,23 @@ def gen_gui():
     c.save(out / "assembly_table.png")
 
     # --- araba yapma masası ekranı ---
-    # Altı girdi yuvası tek sıra: şasi, motor, şanzıman, tekerlek, koltuk, ön cam
+    # Solda altı girdi yuvası (şasi, motor, şanzıman, tekerlek, koltuk, ön cam),
+    # sağda on iki arabanın katalog ızgarası.
     c = Canvas(256, 256)
-    _panel(c, 0, 0, 176, 166)
+    _panel(c, 0, 0, 256, 202)
     for col in range(6):
         _slot(c, 7 + col * 18, 34)
     _arrow(c, 120, 34)
     _slot(c, 144, 34)
+    _inset(c, 178, 16, 74, 76)
+    for row in range(3):
+        for col in range(4):
+            _slot(c, 179 + col * 18, 19 + row * 18)
     for row in range(3):
         for col in range(9):
-            _slot(c, 7 + col * 18, 83 + row * 18)
+            _slot(c, 7 + col * 18, 117 + row * 18)
     for col in range(9):
-        _slot(c, 7 + col * 18, 141)
+        _slot(c, 7 + col * 18, 175)
     c.save(out / "car_workbench.png")
 
     # sekme ikonları (renk / tekerlek / rüzgarlık / motor)
