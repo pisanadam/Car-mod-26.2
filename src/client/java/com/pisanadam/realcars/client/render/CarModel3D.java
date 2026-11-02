@@ -79,6 +79,11 @@ public class CarModel3D extends EntityModel<CarRenderState> {
 		return this.lights;
 	}
 
+	/** Takılı rüzgarlığın parçası; rüzgarlık yoksa null. */
+	public ModelPart spoiler(final SpoilerType type) {
+		return this.spoilers.get(type);
+	}
+
 	/** Motor açıkken far, fren yaparken stop yanar; ikisi de kapalıysa çizim atlanabilir. */
 	public boolean anyLightOn() {
 		return this.headlights.visible || this.brakelights.visible;

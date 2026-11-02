@@ -210,8 +210,69 @@ def check_java_enums():
             err(f"{rel}: Java'da olup spec'te olmayan sabitler: {sorted(extra)}")
 
 
+def check_hd_models():
+    """Her aracın yüksek poligonlu gövdesi, atlası ve atıf kaydı var mı;
+    dosya başlığı ve dörtgen indisleri tutarlı mı?"""
+    import gzip
+    import struct
+
+    import hd_models
+
+    for car in spec.CARS:
+        if car not in hd_models.HD_MODELS:
+            warn(f"{car}: yüksek poligonlu model tanımlı değil, parametrik gövdeyle çizilecek")
+            continue
+        mesh = ASSETS / "hd" / f"{car}.rcm"
+        tex = ASSETS / "textures" / "entity" / "car" / "hd" / f"{car}.png"
+        if not mesh.exists() or not tex.exists():
+            err(f"{car}: HD model dosyası eksik (python3 tools/import_hd_models.py {car})")
+            continue
+        try:
+            data = gzip.decompress(mesh.read_bytes())
+            if data[:4] != b"RCM1":
+                raise ValueError("başlık RCM1 değil")
+            off = 6 + 12
+            bins = data[off]
+            off += 1 + 4 * bins
+            (parts,) = struct.unpack_from("<H", data, off)
+            off += 2
+            kinds = set()
+            for _ in range(parts):
+                kind, _flags = struct.unpack_from("<BB", data, off)
+                kinds.add(kind)
+                off += 2 + 12
+                lods = data[off]
+                off += 1
+                for _ in range(lods):
+                    (n,) = struct.unpack_from("<I", data, off)
+                    off += 4 + n * (12 + 3 + 4)
+                    (q,) = struct.unpack_from("<I", data, off)
+                    off += 4
+                    idx = struct.unpack_from("<%dI" % (q * 4), data, off)
+                    off += q * 16
+                    if idx and max(idx) >= n:
+                        raise ValueError("dörtgen indisi köşe sayısını aşıyor")
+            if off != len(data):
+                raise ValueError("dosya sonunda fazladan bayt")
+            if 5 not in kinds:
+                raise ValueError("tekerlek parçası yok")
+            if 0 not in kinds:
+                warn(f"{car}: HD modelde boyanan parça yok, sprey boya rengi değiştirmez")
+        except Exception as e:  # noqa: BLE001
+            err(f"{car}: HD model bozuk ({e})")
+    credits = (ASSETS / "hd" / "CREDITS.md")
+    if not credits.exists():
+        err("assets/realcars/hd/CREDITS.md yok — CC-BY atfı zorunlu")
+    else:
+        text = credits.read_text(encoding="utf-8")
+        for car, cfg in hd_models.HD_MODELS.items():
+            if cfg["uid"] not in text or cfg["author"] not in text:
+                err(f"{car}: CREDITS.md içinde atıf eksik")
+
+
 def main():
     check_json_parses()
+    check_hd_models()
     check_items()
     check_block_models()
     check_recipes()

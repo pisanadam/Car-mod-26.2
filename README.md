@@ -11,6 +11,7 @@ tekerleğini ve rüzgarlığını değiştirirsin.
 | **Mod yükleyici** | Fabric Loader 0.20.1+ |
 | **Gerekli** | Fabric API 0.165.0+26.3 |
 | **Java** | 25 (Minecraft 26.x zorunlu kılıyor) |
+| **3B modeller** | Gerçek araç modelleri, CC BY 4.0 — bkz. [CREDITS.md](CREDITS.md) |
 
 ---
 
@@ -18,11 +19,11 @@ tekerleğini ve rüzgarlığını değiştirirsin.
 
 1. [Fabric Loader](https://fabricmc.net/use/) 0.20.1 veya üstünü Minecraft 26.3 için kur.
 2. [Fabric API](https://modrinth.com/mod/fabric-api) sürüm `0.165.0+26.3`'yi indir.
-3. Bu modun `realcars-1.0.0.jar` dosyasını ve Fabric API'yi `.minecraft/mods`
+3. Bu modun `realcars-1.1.0.jar` dosyasını ve Fabric API'yi `.minecraft/mods`
    klasörüne at.
 4. Oyunu Fabric profiliyle başlat.
 
-Kaynaktan derlemek için: `JAVA_HOME=<jdk25> ./gradlew build` → `build/libs/realcars-1.0.0.jar`
+Kaynaktan derlemek için: `JAVA_HOME=<jdk25> ./gradlew build` → `build/libs/realcars-1.1.0.jar`
 
 ---
 
@@ -193,36 +194,50 @@ aynı arabayla asfaltta çıkardığın hızı çimende çıkaramazsın.
 
 ## Araç gövdeleri nasıl çiziliyor
 
-Minecraft yalnızca eksen hizalı kutu çizebilir, ama bir *parçanın tamamı*
-döndürülebilir. Bu yüzden modeldeki her eğim, uygun açıyla yatırılmış ince bir
-paneldir: eğimli kaput, yatık ön cam, fastback sırtı, Beetle'ın kesintisiz
-kavisi hepsi böyle kuruluyor. Panelin altında kalan boşluk, panel kalınlığının
-içinde kalacak kadar ince basamaklarla dolduruluyor, bu yüzden dışarıdan
-merdiven görünmüyor.
+Her araç, internetten indirilmiş **açık lisanslı, gerçekçi, yüksek poligonlu bir
+3B modelle** çizilir: Golf GTI 16V, AE86 Corolla, E30 M3, '67 Mustang, R32
+Skyline GT-R, 930 Turbo, Wrangler Rubicon, Hilux, yeni Defender 110, Beetle,
+C10 ve T1 Kombi. Modeller Sketchfab'da CC BY 4.0 lisansıyla yayımlanmış
+çalışmalardır; yazarları ve bağlantıları [CREDITS.md](CREDITS.md) dosyasında
+(ve jar'ın içinde `assets/realcars/hd/CREDITS.md`) yazar.
 
-Her araç `CarModel.java` içinde bir **yan profille** tanımlı: burun yüksekliği,
-kaputun bittiği yer, cam altı hattı, tavanın iki ucu, arka camın dibi ve kuyruk.
-Bunlar gerçek bir araç fotoğrafından okunabilen ölçüler; ön cam açısı gibi
-şeyler otomatik çıkıyor. `Silhouette` de her bölümün kaç panele bölüneceğini ve
-ne kadar kavis yapacağını söylüyor — aynı kod hem Defender'ın dik duvarını hem
-Beetle'ın kubbesini üretiyor.
+Modeller oyuna doğrudan GLB olarak girmez; `tools/import_hd_models.py` onları
+modun kendi biçimine çevirir:
 
-Tekerlekler kare değil: 30 derece aralıklı altı şeridin birleşimi, yani 12
-kenarlı pikselli bir yuvarlak — yarıçap en fazla %3 dalgalanıyor. Şerit
-ölçüleri (`r·cos15°`, `r·sin15°`) köşeler tam çemberin üstüne düşsün diye
-seçildi; tam kare kullanmak köşeleri `r√2`'ye taşıyıp tekerleği çok köşeli bir
-yıldıza çevirirdi.
-
-Tekerleğin görünmesi için gövdede gerçek bir **çamurluk boşluğu** var. Minecraft
-kutudan malzeme çıkaramadığı için boşluk, o bölgeyi hiç doldurmayarak açılıyor:
-kemer tepesinin üstü her yerde tam genişlikte, altı ise tekerleklerin hizasında
-içeri çekiliyor. Yoksa gövde tekerleğin önünü kapatır ve lastiğin yalnızca ince
-bir dilimi dışarı taşardı.
+- **Ölçek ve yön.** Model, aracın gerçek boyuna ölçeklenir (1 blok = 1 metre),
+  burnu öne bakacak şekilde çevrilir ve tekerleklerinin altı zemine oturtulur.
+- **Tekerlekler gövdeden ayrılır.** İndirilen modellerde tekerlek ayrı bir parça
+  olarak gelmez; dönüştürücü her köşede yere değen lastiği bulur, çember
+  yarıçapını lastiğin çizdiği tam daireye göre seçer ve o silindirin içindeki
+  üçgenleri ayrı parçaya alır. Bu sayede tekerlekler yolda yuvarlanır, ön
+  tekerlekler direksiyonla döner. Bulunan ölçüler gerçeğe çok yakındır (ör.
+  Hilux aks arası 3.08 m, gerçeği 3.085 m).
+- **Boya.** Gövde boyası ayrı bir parçaya alınıp griye çevrilir; oyunda sprey
+  boyayla seçtiğin renk onunla çarpılır, yani gerçek modelin bütün kabartmaları
+  ve çizgileri üstünde istediğin renk görünür. Dokuya gömülü iki renkli boyada
+  (T1 Kombi) yalnızca boya rengindeki bölge boyanır.
+- **Cam, far, stop.** Cam yarı saydam çizilir; farlar motor çalışınca, stoplar
+  fren yapınca ışık yayan ayrı bir geçişte parlar.
+- **İki detay seviyesi.** Yakın görünüm 15–60 bin dörtgendir; 40 bloktan ötede
+  çok daha hafif bir sürüm çizilir. Sadeleştirme MeshLab'in quadric yöntemiyle,
+  yüz normalini ters çevirecek adımlar reddedilerek yapılır (yoksa ince kapı
+  panellerinde boya kaybolup içi görünüyordu).
+- **Tek doku.** Bir modelin bütün dokuları ve düz renkleri tek bir atlas
+  sayfasında toplanır, böylece araç birkaç çizim çağrısıyla çizilir.
 
 Araç sürerken **gövde ile tekerlekler ayrı hareket ediyor**: virajda gövde yana
-yatıyor, frende burun dalıyor, tekerlekler yerde kalıyor. Motor açıkken farlar,
-fren yapınca stoplar ayrı bir ışık geçişinde çiziliyor, yani gece gerçekten
-parlıyorlar.
+yatıyor, frende burun dalıyor, tekerlekler yerde kalıyor. Rüzgarlıklar
+modifiye parçası olduğu için hâlâ modun kendi parçalarıdır; gerçek modelin
+bagaj kapağı yüksekliğine oturtulurlar.
+
+### Yedek: parametrik gövde
+
+`.rcm` dosyası bir kaynak paketinden çıkarılırsa ya da okunamazsa araç, modun
+ilk sürümlerindeki parametrik gövdeyle çizilir. O gövde `CarModel.java`
+içindeki **yan profilden** (burun yüksekliği, kaputun bittiği yer, cam altı
+hattı, tavanın iki ucu, kuyruk) ince eğik panellerle kurulur; tekerlekler 12
+kenarlı pikselli yuvarlaklardır. Yani bir kaynak paketi araç modellerini
+kendi modelleriyle değiştirebilir ya da tamamen kapatabilir.
 
 ---
 
@@ -285,6 +300,25 @@ python3 tools/gen_data.py         # tarifler, modeller, blockstate, dil dosyalar
 python3 tools/validate_assets.py  # kırık referans / tarif çakışması / eksik çeviri kontrolü
 ```
 
+**Yüksek poligonlu modeller** `tools/hd_models.py` tablosundan üretilir:
+
+```bash
+pip install trimesh pymeshlab scipy numpy Pillow
+# pymeshlab'in sadeleştirme eklentisi libOpenGL ister (Debian/Ubuntu):
+sudo apt-get install libopengl0 libglu1-mesa
+
+python3 tools/import_hd_models.py              # hepsi
+python3 tools/import_hd_models.py beetle       # tek araç
+python3 tools/import_hd_models.py --preview    # tools/.hd_cache/preview altına kontrol GLB'leri
+```
+
+Dönüştürücü modelleri ilk çalıştırmada Objaverse arşivinden indirir ve
+`tools/.hd_cache` altında saklar. Tabloda her model için kaynak kimliği, yazar,
+burnun yönü ve hangi malzemenin boya / cam / far olduğu yazar; başka bir modelle
+değiştirmek için oradaki satırı düzenlemek yeterlidir. Yeni bir model eklerken
+lisansının CC0 ya da CC BY olmasına dikkat et ve `--preview` çıktısına bak:
+önizlemede boyanan yüzeyler pembe görünür.
+
 **Yeni araç eklemek** iki dosyaya birer kayıt yazmaktır:
 
 1. `tools/spec.py` → `CARS` tablosuna bir satır
@@ -293,6 +327,8 @@ python3 tools/validate_assets.py  # kırık referans / tarif çakışması / eks
 
 Sonra üreticileri çalıştır; doku, ikon, tarif, dil anahtarı ve 3B gövde
 otomatik üretilir. `validate_assets.py` iki dosyanın uyumunu kontrol eder.
+Gerçek bir 3B model de istiyorsan `tools/hd_models.py`'ye üçüncü bir kayıt ekle
+ve `import_hd_models.py`'yi çalıştır; yoksa araç parametrik gövdeyle çizilir.
 
 ### Testler
 
@@ -304,17 +340,26 @@ JAVA_HOME=<jdk25> tools/smoke_test.sh # başsız sunucuda 12 aracı spawn edip g
 # Oyunu gerçekten açan görsel test: dünya kurar, on iki aracın her birini tek
 # tek yandan ve 3/4 açıdan fotoğraflar, sonra bir tanesine binip hızlanmayı,
 # virajda yatmayı, frende burun dalmasını ve stop lambalarını sayılarla
-# doğrular. Ayrıca yeni giren oyuncunun tarif kitabında modun bütün tariflerinin
-# açık olduğunu ve /cars recipes komutunun çalıştığını sınar.
+# doğrular. Ayrıca her aracın gerçekten yüksek poligonlu gövdeyle çizildiğini,
+# yeni giren oyuncunun tarif kitabında modun bütün tariflerinin açık olduğunu
+# ve /cars recipes komutunun çalıştığını sınar.
 # Görüntüler build/run/clientGametest/screenshots altına düşer.
 JAVA_HOME=<jdk25> ./gradlew runClientGametest
-# Başsız bir makinede (yazılım OpenGL ile):
-LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1280x720x24" \
-  ./gradlew runClientGametest
+# Başsız bir makinede: 26.3 penceresi sRGB destekli bir framebuffer istiyor,
+# Xvfb'nin yazılım OpenGL'i bunu sunmadığı için oyun Vulkan'a geçer. Mesa'nın
+# yazılım Vulkan sürücüsü (lavapipe) yeterli:
+#   sudo apt-get install xvfb mesa-vulkan-drivers libvulkan1
+xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest
 ```
 
 ---
 
 ## Lisans
 
-MIT — `LICENSE` dosyasına bak.
+Kod MIT lisanslıdır — `LICENSE` dosyasına bak.
+
+`assets/realcars/hd/` altındaki araç modelleri ve
+`assets/realcars/textures/entity/car/hd/` altındaki dokuları, özgün yazarlarının
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) lisansıyla
+yayımladığı modellerden türetilmiştir. Modu dağıtırken [CREDITS.md](CREDITS.md)
+dosyasındaki atıfları korumalısın.

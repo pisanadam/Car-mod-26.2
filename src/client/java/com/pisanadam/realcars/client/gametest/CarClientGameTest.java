@@ -1,6 +1,8 @@
 package com.pisanadam.realcars.client.gametest;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.pisanadam.realcars.RealCars;
+import com.pisanadam.realcars.client.render.CarEntityRenderer;
 import com.pisanadam.realcars.entity.CarEntity;
 import com.pisanadam.realcars.entity.CarModel;
 import com.pisanadam.realcars.entity.SpoilerType;
@@ -66,6 +68,7 @@ public class CarClientGameTest implements FabricClientGameTest {
 			context.waitTicks(40);
 			context.takeScreenshot("01-tum-araclar");
 
+			checkHdBodies(context);
 			checkRecipesLoaded(singleplayer);
 			checkRecipesUnlocked(singleplayer);
 			checkRecipeCommand(singleplayer);
@@ -252,6 +255,29 @@ public class CarClientGameTest implements FabricClientGameTest {
 	/** Araçların bulunduğu bölgeyi kapsayan arama kutusu. */
 	private static AABB searchArea() {
 		return new AABB(-80.0D, GROUND_Y - 8.0D, -80.0D, 80.0D, GROUND_Y + 24.0D, 80.0D);
+	}
+
+	/**
+	 * Her aracın gerçek modelden dönüştürülmüş yüksek poligonlu gövdeyle
+	 * çizildiğini doğrular. Dosya eksik ya da bozuksa renderer sessizce
+	 * parametrik gövdeye döner; bu test o sessizliği yakalar.
+	 */
+	private static void checkHdBodies(final ClientGameTestContext context) {
+		context.runOnClient(client -> {
+			final var level = client.level;
+			final List<CarEntity> cars = level.getEntitiesOfClass(CarEntity.class, searchArea());
+			for (final CarEntity car : cars) {
+				final var renderer = client.getEntityRenderDispatcher().getRenderer(car);
+				if (!(renderer instanceof CarEntityRenderer carRenderer) || !carRenderer.usesHdMesh()) {
+					throw new AssertionError(car.model().itemName() + " yüksek poligonlu gövdeyle çizilmiyor");
+				}
+				final int quads = carRenderer.hdMesh().quadCount();
+				if (quads < 10000) {
+					throw new AssertionError(car.model().itemName() + " gövdesi beklenenden kaba: " + quads + " dörtgen");
+				}
+				RealCars.LOGGER.info("HD gövde: {} -> {} dörtgen", car.model().itemName(), quads);
+			}
+		});
 	}
 
 	/** On iki aracı bir sıra hâlinde çıkarır. */
