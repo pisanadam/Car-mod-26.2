@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * Araç kullanırken geçerli tuşlar. Yön tuşları vanilla hareket tuşlarıdır;
@@ -23,8 +22,8 @@ public final class CarKeyBindings {
 	private static final KeyMapping.Category CATEGORY =
 		KeyMapping.Category.register(RealCars.id("controls"));
 
-	public static final KeyMapping ENGINE_TOGGLE = register("key.realcars.engine_toggle", GLFW.GLFW_KEY_G);
-	public static final KeyMapping HORN = register("key.realcars.horn", GLFW.GLFW_KEY_H);
+	public static final KeyMapping ENGINE_TOGGLE = register("key.realcars.engine_toggle", InputConstants.KEY_G);
+	public static final KeyMapping HORN = register("key.realcars.horn", InputConstants.KEY_H);
 
 	private CarKeyBindings() {
 	}
@@ -43,7 +42,7 @@ public final class CarKeyBindings {
 
 	private static KeyMapping register(final String translationKey, final int key) {
 		return KeyMappingHelper.registerKeyMapping(
-			new KeyMapping(translationKey, InputConstants.Type.KEYSYM, key, CATEGORY));
+			new KeyMapping(translationKey, InputConstants.Type.KEYBOARD, key, CATEGORY));
 	}
 
 	/** Basılan tuşları sunucuya bildirir; yalnızca araçtayken çalışır. */

@@ -1,6 +1,5 @@
 package com.pisanadam.realcars.block;
 
-import com.mojang.serialization.MapCodec;
 import com.pisanadam.realcars.entity.CarEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,7 +24,6 @@ import net.minecraft.sounds.SoundEvents;
  * için envanterden bir kömür harcanır.
  */
 public class FuelPumpBlock extends HorizontalDirectionalBlock {
-	public static final MapCodec<FuelPumpBlock> CODEC = simpleCodec(FuelPumpBlock::new);
 
 	/** Bir kömürün doldurduğu yakıt miktarı (litre). */
 	private static final float FUEL_PER_COAL = 20.0F;
@@ -33,11 +31,6 @@ public class FuelPumpBlock extends HorizontalDirectionalBlock {
 	public FuelPumpBlock(final BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
-	}
-
-	@Override
-	public MapCodec<? extends FuelPumpBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

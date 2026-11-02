@@ -1,6 +1,5 @@
 package com.pisanadam.realcars.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -25,16 +24,10 @@ import org.jspecify.annotations.Nullable;
  * sebebi orada anlatılıyor.
  */
 public class AssemblyTableBlock extends Block {
-	public static final MapCodec<AssemblyTableBlock> CODEC = simpleCodec(AssemblyTableBlock::new);
 	private static final Component TITLE = Component.translatable("gui.realcars.assembly");
 
 	public AssemblyTableBlock(final BlockBehaviour.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public MapCodec<? extends AssemblyTableBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

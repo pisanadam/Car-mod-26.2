@@ -1,6 +1,5 @@
 package com.pisanadam.realcars.block;
 
-import com.mojang.serialization.MapCodec;
 import com.pisanadam.realcars.entity.CarEntity;
 import com.pisanadam.realcars.registry.ModMenus;
 import java.util.List;
@@ -21,17 +20,11 @@ import org.jspecify.annotations.Nullable;
  * açar; İngiliz anahtarı olmadan modifiye yapmanın kalıcı yoludur.
  */
 public class CarLiftBlock extends Block {
-	public static final MapCodec<CarLiftBlock> CODEC = simpleCodec(CarLiftBlock::new);
 	/** Liftin araç arayacağı yarıçap (blok). */
 	private static final double SEARCH_RADIUS = 4.0D;
 
 	public CarLiftBlock(final BlockBehaviour.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public MapCodec<? extends CarLiftBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.pisanadam.realcars.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
@@ -16,17 +15,11 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
  * yüzden blok yalnızca yatay eksende döner (kuzey-güney ya da doğu-batı).
  */
 public class RoadLineBlock extends Block {
-	public static final MapCodec<RoadLineBlock> CODEC = simpleCodec(RoadLineBlock::new);
 	public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
 	public RoadLineBlock(final BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HORIZONTAL_AXIS, Direction.Axis.Z));
-	}
-
-	@Override
-	public MapCodec<? extends RoadLineBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

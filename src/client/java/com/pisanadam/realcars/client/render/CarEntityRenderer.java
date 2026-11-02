@@ -77,10 +77,10 @@ public class CarEntityRenderer extends EntityRenderer<CarEntity, CarRenderState>
 		poseStack.pushPose();
 		// Model uzayında Y aşağı doğru büyür; vanilla araç/varlık çizimindeki
 		// gibi ters çevirip aracın burnunu +Z'ye bakacak şekilde döndürüyoruz.
-		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - state.yRot));
+		poseStack.rotate(Axis.YP.rotationDegrees(180.0F - state.yRot));
 		if (state.hurtTime > 0.0F) {
 			// Hasar alınca araç hafifçe sarsılsın.
-			poseStack.mulPose(Axis.ZP.rotationDegrees(
+			poseStack.rotate(Axis.ZP.rotationDegrees(
 				Mth.sin(state.hurtTime) * state.hurtTime * state.damageTime / 12.0F * state.hurtDir));
 		}
 
@@ -90,26 +90,26 @@ public class CarEntityRenderer extends EntityRenderer<CarEntity, CarRenderState>
 		poseStack.pushPose();
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		collector.submitModelPart(this.model.wheelRoot(), poseStack, this.renderType,
-			state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, null, state.outlineColor);
+			state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, state.outlineColor);
 		poseStack.popPose();
 
 		// --- gövde: yalpa merkezi etrafında yatar ve dalar ---
 		poseStack.translate(0.0F, this.rollCentre, 0.0F);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(state.bodyRoll));
-		poseStack.mulPose(Axis.XP.rotationDegrees(state.bodyPitch));
+		poseStack.rotate(Axis.ZP.rotationDegrees(state.bodyRoll));
+		poseStack.rotate(Axis.XP.rotationDegrees(state.bodyPitch));
 		poseStack.translate(0.0F, -this.rollCentre, 0.0F);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 
 		// Boyanan paneller araç rengiyle, geri kalan parçalar kendi renginde.
 		final int tint = 0xFF000000 | state.color;
 		collector.submitModelPart(this.model.painted(), poseStack, this.renderType,
-			state.lightCoords, OverlayTexture.NO_OVERLAY, null, tint, null, state.outlineColor);
+			state.lightCoords, OverlayTexture.NO_OVERLAY, null, tint, state.outlineColor);
 		collector.submitModelPart(this.model.plain(), poseStack, this.renderType,
-			state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, null, state.outlineColor);
+			state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, state.outlineColor);
 		if (this.model.anyLightOn()) {
 			// Işık yayan geçiş: farlar karanlıkta gerçekten parlar.
 			collector.submitModelPart(this.model.lights(), poseStack, this.glowType,
-				state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, null, state.outlineColor);
+				state.lightCoords, OverlayTexture.NO_OVERLAY, null, NO_TINT, state.outlineColor);
 		}
 
 		poseStack.popPose();

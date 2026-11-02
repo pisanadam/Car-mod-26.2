@@ -11,6 +11,7 @@ import com.pisanadam.realcars.registry.ModItems;
 import com.pisanadam.realcars.registry.ModMenus;
 import com.pisanadam.realcars.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -200,7 +201,7 @@ public class CarModificationMenu extends AbstractContainerMenu {
 	private void give(final Player clicker, final Item item, final int count) {
 		final ItemStack stack = new ItemStack(item, count);
 		if (!clicker.getInventory().add(stack) && !stack.isEmpty()) {
-			clicker.drop(stack, false);
+			clicker.drop(stack, false, Prediction.SERVER_ONLY);
 		}
 	}
 

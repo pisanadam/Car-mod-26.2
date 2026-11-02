@@ -1,4 +1,4 @@
-# RealCars — Minecraft 26.2 Araba Modu
+# RealCars — Minecraft 26.3 Araba Modu
 
 Gerçek hayattaki arabaları Minecraft'a getiren bir Fabric modu: parçalardan araba
 craftlarsın, motoru çalıştırıp sürersin, km/saat göstergesinden hızını görürsün,
@@ -7,17 +7,17 @@ tekerleğini ve rüzgarlığını değiştirirsin.
 
 | | |
 |---|---|
-| **Minecraft** | 26.2 (Java Edition) |
-| **Mod yükleyici** | Fabric Loader 0.19.3+ |
-| **Gerekli** | Fabric API 0.156.0+26.2 |
+| **Minecraft** | 26.3 (Java Edition) |
+| **Mod yükleyici** | Fabric Loader 0.20.1+ |
+| **Gerekli** | Fabric API 0.165.0+26.3 |
 | **Java** | 25 (Minecraft 26.x zorunlu kılıyor) |
 
 ---
 
 ## Kurulum
 
-1. [Fabric Loader](https://fabricmc.net/use/) 0.19.3 veya üstünü Minecraft 26.2 için kur.
-2. [Fabric API](https://modrinth.com/mod/fabric-api) sürüm `0.156.0+26.2`'yi indir.
+1. [Fabric Loader](https://fabricmc.net/use/) 0.20.1 veya üstünü Minecraft 26.3 için kur.
+2. [Fabric API](https://modrinth.com/mod/fabric-api) sürüm `0.165.0+26.3`'yi indir.
 3. Bu modun `realcars-1.0.0.jar` dosyasını ve Fabric API'yi `.minecraft/mods`
    klasörüne at.
 4. Oyunu Fabric profiliyle başlat.

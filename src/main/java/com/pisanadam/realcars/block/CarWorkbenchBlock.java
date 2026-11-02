@@ -1,6 +1,5 @@
 package com.pisanadam.realcars.block;
 
-import com.mojang.serialization.MapCodec;
 import com.pisanadam.realcars.menu.CarWorkbenchMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,16 +21,10 @@ import org.jspecify.annotations.Nullable;
  * gideceğini ezberlemek zorunda olmaman.
  */
 public class CarWorkbenchBlock extends Block {
-	public static final MapCodec<CarWorkbenchBlock> CODEC = simpleCodec(CarWorkbenchBlock::new);
 	private static final Component TITLE = Component.translatable("gui.realcars.workbench");
 
 	public CarWorkbenchBlock(final BlockBehaviour.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public MapCodec<? extends CarWorkbenchBlock> codec() {
-		return CODEC;
 	}
 
 	@Override

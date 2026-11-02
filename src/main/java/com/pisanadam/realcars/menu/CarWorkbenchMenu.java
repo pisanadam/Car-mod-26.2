@@ -8,6 +8,7 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -189,7 +190,7 @@ public class CarWorkbenchMenu extends AbstractContainerMenu {
 			return true;
 		}
 		if (!current.isEmpty()) {
-			who.getInventory().placeItemBackInInventory(current);
+			who.getInventory().placeItemBackInInventory(current, Prediction.SERVER_ONLY);
 			this.inputs.setItem(slot, ItemStack.EMPTY);
 		}
 		if (who.getAbilities().instabuild) {

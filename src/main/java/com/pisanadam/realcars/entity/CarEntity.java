@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
+import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Input;
@@ -86,7 +87,6 @@ public class CarEntity extends VehicleEntity {
 		SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
 
 	private final CarModel model;
-	private final InterpolationHandler interpolation = new InterpolationHandler(this, 3);
 
 	/** İşaretli hız: eksi değer geri gidildiği anlamına gelir (km/s). */
 	private float speedKmh;
@@ -245,8 +245,8 @@ public class CarEntity extends VehicleEntity {
 			this.setDamage(this.getDamage() - 1.0F);
 		}
 
+		// 26.3: konum yumuşatması Entity.commonTick() içinde, tick'ten önce yapılıyor.
 		super.tick();
-		this.interpolation.interpolate();
 
 		if (this.isLocalInstanceAuthoritative()) {
 			this.driveTick();
@@ -854,8 +854,8 @@ public class CarEntity extends VehicleEntity {
 	}
 
 	@Override
-	public @Nullable InterpolationHandler getInterpolation() {
-		return this.interpolation;
+	protected InterpolationHandler createInterpolationHandler() {
+		return LinearInterpolationHandler.create(this, 3);
 	}
 
 	// ----------------------------------------------------------------------
