@@ -994,7 +994,9 @@ def write_credits():
     """CC-BY 4.0 atıf zorunluluğu: eser adı, yazar, kaynak, lisans ve
     yapılan değişiklikler. Hem depo kökünde hem jar'ın içinde durur."""
     lines = [
-        "# 3B araç modelleri — atıflar",
+        "# Atıflar",
+        "",
+        "## 3B araç modelleri",
         "",
         "Araçların yüksek poligonlu gövdeleri, aşağıdaki sanatçıların Sketchfab'da",
         "[Creative Commons Atıf 4.0](%s) lisansıyla yayımladığı modellerden" % hd_models.LICENSE_URL,
@@ -1016,6 +1018,9 @@ def write_credits():
     for car_id, cfg in hd_models.HD_MODELS.items():
         lines.append("| `%s` | [%s](%s) | %s | CC BY 4.0 |" % (
             car_id, cfg["title"].replace("|", "/"), hd_models.sketchfab_url(cfg["uid"]), cfg["author"]))
+    import import_engine_sounds
+
+    lines += import_engine_sounds.credits_section()
     text = "\n".join(lines) + "\n"
     (ROOT / "CREDITS.md").write_text(text, encoding="utf-8")
     (OUT_MESH / "CREDITS.md").write_text(text, encoding="utf-8")

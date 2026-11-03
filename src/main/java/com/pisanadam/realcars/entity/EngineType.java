@@ -17,7 +17,9 @@ public enum EngineType implements StringRepresentable {
 	ENGINE_I6("engine_i6", 6, 1.30F, 7200),
 	ENGINE_V6("engine_v6", 6, 1.25F, 7000),
 	ENGINE_V8("engine_v8", 8, 1.55F, 6600),
-	ENGINE_FLAT6("engine_flat6", 6, 1.40F, 7600);
+	ENGINE_FLAT6("engine_flat6", 6, 1.40F, 7600),
+	/** Hava soğutmalı boksör 4: Beetle ve T1'in motoru. */
+	ENGINE_FLAT4("engine_flat4", 4, 0.85F, 5200);
 
 	public static final Codec<EngineType> CODEC = StringRepresentable.fromEnum(EngineType::values);
 	private static final IntFunction<EngineType> BY_ID =
@@ -59,16 +61,5 @@ public enum EngineType implements StringRepresentable {
 	/** Kırmızı bölgenin başladığı devir. */
 	public int redlineRpm() {
 		return this.redlineRpm;
-	}
-
-	/** Bu motorun ses döngüsünün adı ({@code sounds.json} ile eşleşir). */
-	public String soundName() {
-		return "engine_loop_" + switch (this) {
-			case ENGINE_I4 -> "i4";
-			case ENGINE_I6 -> "i6";
-			case ENGINE_V6 -> "v6";
-			case ENGINE_V8 -> "v8";
-			case ENGINE_FLAT6 -> "flat6";
-		};
 	}
 }

@@ -5,7 +5,7 @@
   "key": {
     "W": "realcars:wheel_street",
     "G": "realcars:windshield",
-    "E": "realcars:engine_i4",
+    "E": "realcars:engine_flat4",
     "C": "realcars:chassis_van",
     "T": "realcars:transmission_manual",
     "S": "realcars:car_seat"

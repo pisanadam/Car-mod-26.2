@@ -1,4 +1,6 @@
-# 3B araç modelleri — atıflar
+# Atıflar
+
+## 3B araç modelleri
 
 Araçların yüksek poligonlu gövdeleri, aşağıdaki sanatçıların Sketchfab'da
 [Creative Commons Atıf 4.0](https://creativecommons.org/licenses/by/4.0/) lisansıyla yayımladığı modellerden
@@ -28,3 +30,32 @@ yazarları ve bu mod o üreticilerle bağlantılı değildir.
 | `beetle` | [Beetle/Fusca (Version 1)](https://sketchfab.com/3d-models/cb6e82e73386448fb3b4e2dd25255a5e) | soujagah | CC BY 4.0 |
 | `c10` | [1983 Chevrolet C10](https://sketchfab.com/3d-models/14116da06a65420db32b585466061d31) | korsun | CC BY 4.0 |
 | `transporter` | [Volkswagen Kombi Micro Bus](https://sketchfab.com/3d-models/d34fd744db1c4f84ad40c854ddbff9e9) | winterborn | CC BY 4.0 |
+
+## Motor sesleri
+
+Motor sesleri aşağıdaki gerçek kayıtlardan üretilmiştir (Freesound; Hugging Face'teki
+[lisans bilgili aynasından](https://huggingface.co/datasets/benjamin-paine/freesound-laion-640k) indirildi).
+Her kayıttan rölanti, orta ve yüksek devir döngüleri kesildi, perdesi harmonik çizgi
+izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi
+(`tools/import_engine_sounds.py`).
+
+| Ses | Kayıt | Yazar | Lisans |
+|---|---|---|---|
+| `golf_gti` | [SFX Car Engine Outside Idle](https://freesound.org/s/401552/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `golf_gti` | [SFX Car Engine Outside RPMMed](https://freesound.org/s/401555/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `golf_gti` | [SFX Car Engine Outside RPMHigh](https://freesound.org/s/401551/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `corolla` | [4A-GE Engine Starting and Loop](https://freesound.org/s/509628/) | qopsinonstudios | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `corolla` | [4A-GE Engine Loop 1](https://freesound.org/s/509626/) | qopsinonstudios | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `corolla` | [4A-GE Engine Loop 2](https://freesound.org/s/509627/) | qopsinonstudios | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `bmw_m3` | [BMWM3 01](https://freesound.org/s/415276/) | ikbenraar | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `mustang_gt` | [ford mustang v8 rear 2](https://freesound.org/s/384058/) | pastori666 | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `gtr` | [1953 Studebaker Idle up to 6000rpm](https://freesound.org/s/238847/) | lonemonk | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `porsche_911` | [Porsche idle](https://freesound.org/s/113216/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `porsche_911` | [Porsche Exhaust](https://freesound.org/s/113214/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `wrangler` | [Jeep in the Mountians #1](https://freesound.org/s/253439/) | deleted_user_4401185 | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `hilux` | [Diesel Start-Idle-Revs MZ000004](https://freesound.org/s/443319/) | DAVESTALKER | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `defender` | [Renault Master F3500 dCi135 Engine Start Up Idle Gas Pressing And Shut Down Mono](https://freesound.org/s/425845/) | Soundholder | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `beetle` | [Volkswagen Beetle 1961](https://freesound.org/s/544344/) | klankbeeld | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `c10` | [Chev 350 rev and idle](https://freesound.org/s/123685/) | lonemonk | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `transporter` | [Volkswagen Type 2 revving up2](https://freesound.org/s/332695/) | nhaudio | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `v6` | [Vitara V6 engine](https://freesound.org/s/249720/) | Keith Selmes | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |

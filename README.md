@@ -168,16 +168,16 @@ Depo boşalırsa motor durur. İki doldurma yolu var:
 |---|---|---|---|---|---|---|
 | Volkswagen Golf GTI | Hatchback | 250 km/s | 6.2 sn | I4 | Manuel | Spor |
 | Toyota Corolla | Sedan | 190 km/s | 10.4 sn | I4 | Otomatik | Sokak |
-| BMW M3 | Sedan | 290 km/s | 4.1 sn | I6 | Manuel | Spor |
+| BMW M3 | Sedan | 290 km/s | 4.1 sn | I4 | Manuel | Spor |
 | Ford Mustang GT | Spor | 250 km/s | 4.3 sn | V8 | Manuel | Spor |
-| Nissan GT-R | Spor | 315 km/s | 2.9 sn | V6 | Spor DCT | Spor |
+| Nissan GT-R | Spor | 315 km/s | 2.9 sn | I6 | Spor DCT | Spor |
 | Porsche 911 | Spor | 300 km/s | 3.4 sn | Boksör 6 | Spor DCT | Spor |
 | Jeep Wrangler | Arazi | 180 km/s | 7.6 sn | V6 | Otomatik | Arazi |
 | Toyota Hilux | Kamyonet | 175 km/s | 11.0 sn | I4 | Manuel | Arazi |
 | Land Rover Defender | SUV | 190 km/s | 6.6 sn | I6 | Otomatik | Arazi |
-| Volkswagen Beetle | Klasik | 130 km/s | 17.5 sn | I4 | Manuel | Sokak |
+| Volkswagen Beetle | Klasik | 130 km/s | 17.5 sn | Boksör 4 | Manuel | Sokak |
 | Chevrolet C10 | Klasik kamyonet | 160 km/s | 9.0 sn | V8 | Manuel | Sokak |
-| VW Transporter T1 | Minibüs | 105 km/s | 22.0 sn | I4 | Manuel | Sokak |
+| VW Transporter T1 | Minibüs | 105 km/s | 22.0 sn | Boksör 4 | Manuel | Sokak |
 
 ---
 
@@ -249,9 +249,18 @@ kendi modelleriyle değiştirebilir ya da tamamen kapatabilir.
   görüş mesafesini artırmak ya da yolu önceden yüklenmiş tutmak yardımcı olur.
 - **Kapı sesi.** Araca binip inerken kapı sesi çalar; sunucudan çalındığı için
   yanından geçen birinin bindiğini de duyarsın.
-- **Motor sesi devirle değişir.** Ses dosyaları sentezle üretildi; her motor tipi
-  kendi ateşleme mertebesini vurguluyor, bu yüzden V8 ile 4 silindir kulakta
-  gerçekten farklı duyuluyor.
+- **Motor sesleri gerçek kayıtlardan.** Sesler açık lisanslı (CC0 / CC BY) gerçek
+  motor kayıtlarından kesildi; mümkün olan her araçta kendi motorundan: Corolla'da
+  AE86'nın 4A-GE'si, M3'te bir BMW M3, Mustang'de bir Mustang V8, 911'de bir
+  Porsche, Beetle'da 1961 bir Beetle, T1'de bir VW Type 2, C10'da bir Chevrolet 350
+  V8, Wrangler'da bir Jeep. Diğerleri en yakın kayıttan (dizeller için turbo dizel
+  kamyonet/van, Golf için oyun için kaydedilmiş bir benzinli otomobil seti). Her
+  kayıttan rölanti, orta ve yüksek devirde üç döngü çıkarıldı; oyunda devre göre
+  üçü arasında yumuşakça geçilir ve her biri kendi kayıt devrine göre perdelenir.
+  Yani motor tek bir sesi incelterek değil, her devirde kendine yakın gerçek bir
+  kaydın tınısıyla yükselir. Modifiyede başka bir motor takarsan ses de o motora
+  geçer: Golf'e V8 takınca Mustang gibi gürler. Kaynaklar ve yazarlar
+  [CREDITS.md](CREDITS.md) içinde.
 - **Yokuş çıkar, hendeğe düşmez.** Araç bir bloklık basamakları ve merdivenleri
   tırmanır. Çarpışma kutusu aracın uzunluğunu kapsamadığı için dar bir boşluğa
   sığar; bu yüzden zemin desteği kutuya değil gerçek aks konumlarına bakılarak
@@ -295,7 +304,8 @@ tarafından `tools/spec.py`'deki tek tabloya bakılarak oluşturulur.
 pip install numpy Pillow soundfile
 
 python3 tools/gen_textures.py     # araç atlası, item ikonları, blok dokuları, HUD kadranı
-python3 tools/gen_sounds.py       # motor sesleri (FFT sentezi) -> .ogg
+python3 tools/gen_sounds.py       # marş, korna, fren vb. (FFT sentezi) -> .ogg
+python3 tools/import_engine_sounds.py  # gerçek kayıtlardan motor sesleri (bkz. aşağı)
 python3 tools/gen_data.py         # tarifler, modeller, blockstate, dil dosyaları
 python3 tools/validate_assets.py  # kırık referans / tarif çakışması / eksik çeviri kontrolü
 ```
@@ -311,6 +321,21 @@ python3 tools/import_hd_models.py              # hepsi
 python3 tools/import_hd_models.py beetle       # tek araç
 python3 tools/import_hd_models.py --preview    # tools/.hd_cache/preview altına kontrol GLB'leri
 ```
+
+**Motor sesleri** `tools/sound_sources.py` tablosundaki Freesound kayıtlarından
+üretilir; kayıtlar Freesound'un Hugging Face'teki lisans bilgili aynasından
+indirilir (`pip install numpy scipy soundfile pyarrow huggingface_hub`):
+
+```bash
+python3 tools/import_engine_sounds.py          # hepsi
+python3 tools/import_engine_sounds.py beetle   # tek ses
+```
+
+Tabloda her ses için rölanti / orta / yüksek devir katmanlarının hangi kayıttan
+ve hangi saniye aralığından alınacağı yazar (spektrograma bakılarak seçildi).
+Araç penceredeki harmonik çizgiyi izleyerek perdeyi sabitler, dikişsiz döngüye
+çevirir, katmanların devir oranını spektrum hizalamasıyla ölçüp
+`assets/realcars/engine_voices.json`'a yazar ve CREDITS.md'yi günceller.
 
 Dönüştürücü modelleri ilk çalıştırmada Objaverse arşivinden indirir ve
 `tools/.hd_cache` altında saklar. Tabloda her model için kaynak kimliği, yazar,
@@ -357,6 +382,9 @@ xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest
 ## Lisans
 
 Kod MIT lisanslıdır — `LICENSE` dosyasına bak.
+
+`assets/realcars/sounds/engine/` altındaki motor sesleri Freesound'daki CC0 ve
+CC BY lisanslı kayıtlardan türetilmiştir; yazarları CREDITS.md'de.
 
 `assets/realcars/hd/` altındaki araç modelleri ve
 `assets/realcars/textures/entity/car/hd/` altındaki dokuları, özgün yazarlarının

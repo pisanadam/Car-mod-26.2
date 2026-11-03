@@ -1,0 +1,54 @@
+{
+ "beetle": {
+  "mid": 1.634,
+  "high": 2.466
+ },
+ "bmw_m3": {
+  "mid": 1.957,
+  "high": 2.631
+ },
+ "c10": {
+  "mid": 1.943,
+  "high": 2.932
+ },
+ "corolla": {
+  "mid": 1.782,
+  "high": 2.245
+ },
+ "defender": {
+  "mid": 1.634,
+  "high": 2.448
+ },
+ "golf_gti": {
+  "mid": 2.396,
+  "high": 3.062
+ },
+ "gtr": {
+  "mid": 1.706,
+  "high": 2.294
+ },
+ "hilux": {
+  "mid": 1.929,
+  "high": 2.89
+ },
+ "mustang_gt": {
+  "mid": 2.014,
+  "high": 3.04
+ },
+ "porsche_911": {
+  "mid": 1.706,
+  "high": 2.89
+ },
+ "transporter": {
+  "mid": 1.233,
+  "high": 2.104
+ },
+ "v6": {
+  "mid": 1.821,
+  "high": 2.728
+ },
+ "wrangler": {
+  "mid": 1.335,
+  "high": 2.0
+ }
+}

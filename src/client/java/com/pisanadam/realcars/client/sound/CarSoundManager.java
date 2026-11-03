@@ -1,7 +1,9 @@
 package com.pisanadam.realcars.client.sound;
 
 import com.pisanadam.realcars.entity.CarEntity;
-import com.pisanadam.realcars.entity.EngineType;
+import com.pisanadam.realcars.entity.EngineVoice;
+import java.util.ArrayList;
+import java.util.List;
 import com.pisanadam.realcars.registry.ModSounds;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
@@ -34,7 +36,15 @@ public final class CarSoundManager {
 	private static final Int2LongMap LAST_BRAKE = new Int2LongOpenHashMap();
 	private static int brakeSounds;
 
-	private record Playing(CarEngineSoundInstance instance, EngineType engine) {
+	/** Bir aracın çalan motor sesi: aynı kaydın üç devir katmanı. */
+	private record Playing(List<CarEngineSoundInstance> layers, EngineVoice voice) {
+		boolean stopped() {
+			return this.layers.stream().allMatch(CarEngineSoundInstance::isStopped);
+		}
+
+		void stop() {
+			this.layers.forEach(CarEngineSoundInstance::stopEngine);
+		}
 	}
 
 	private CarSoundManager() {
@@ -52,12 +62,12 @@ public final class CarSoundManager {
 			final Int2ObjectMap.Entry<Playing> entry = iterator.next();
 			final Playing playing = entry.getValue();
 			final Entity entity = client.level.getEntity(entry.getIntKey());
-			final boolean stale = playing.instance().isStopped()
+			final boolean stale = playing.stopped()
 				|| !(entity instanceof CarEntity car)
 				|| !car.engineOn()
-				|| car.engineType() != playing.engine();
+				|| voiceOf(car) != playing.voice();
 			if (stale) {
-				playing.instance().stopEngine();
+				playing.stop();
 				iterator.remove();
 			}
 		}
@@ -67,9 +77,14 @@ public final class CarSoundManager {
 				continue;
 			}
 			if (car.engineOn() && !ACTIVE.containsKey(car.getId())) {
-				final CarEngineSoundInstance instance = new CarEngineSoundInstance(car);
-				client.getSoundManager().play(instance);
-				ACTIVE.put(car.getId(), new Playing(instance, car.engineType()));
+				final EngineVoice voice = voiceOf(car);
+				final List<CarEngineSoundInstance> layers = new ArrayList<>(3);
+				for (final EngineVoice.Layer layer : EngineVoice.Layer.values()) {
+					final CarEngineSoundInstance instance = new CarEngineSoundInstance(car, voice, layer);
+					client.getSoundManager().play(instance);
+					layers.add(instance);
+				}
+				ACTIVE.put(car.getId(), new Playing(List.copyOf(layers), voice));
 			}
 			// Fren, motorun açık olmasına bağlı değil ve yalnızca sürücünün
 			// değil çevredekilerin de duyması gerekir; bu yüzden görünen her
@@ -146,8 +161,19 @@ public final class CarSoundManager {
 		}
 	}
 
+	/** Aracın takılı motoruna göre duyulacak kayıt. */
+	public static EngineVoice voiceOf(final CarEntity car) {
+		return EngineVoice.of(car.model(), car.engineType());
+	}
+
+	/** Test için: araç için şu an çalan motor sesi, yoksa null. */
+	public static EngineVoice playingVoice(final CarEntity car) {
+		final Playing playing = ACTIVE.get(car.getId());
+		return playing == null ? null : playing.voice();
+	}
+
 	public static void clear() {
-		ACTIVE.values().forEach(playing -> playing.instance().stopEngine());
+		ACTIVE.values().forEach(Playing::stop);
 		ACTIVE.clear();
 		LAST_BRAKE.clear();
 	}

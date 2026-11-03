@@ -19,6 +19,7 @@ ENGINES = {
     "engine_v6":    (6, "V6 Motor", "V6 Engine", 1.25),
     "engine_v8":    (8, "V8 Motor", "V8 Engine", 1.55),
     "engine_flat6": (6, "Boksör 6 Motor", "Flat-6 Engine", 1.40),
+    "engine_flat4": (4, "Boksör 4 Motor", "Flat-4 Engine", 0.85),
 }
 
 # id -> (tr_ad, en_ad, vites sayısı, otomatik mi, vites geçiş hızı çarpanı)
@@ -74,7 +75,7 @@ CARS = {
         color=(0xD8, 0xDC, 0xE2)),
     "bmw_m3": dict(
         tr="BMW M3", en="BMW M3", klass="sedan",
-        chassis="chassis_sport", engine="engine_i6", trans="transmission_manual",
+        chassis="chassis_sport", engine="engine_i4", trans="transmission_manual",
         wheel="wheel_sport", top_kmh=290, accel=4.1, mass=1730, fuel=59,
         color=(0x1B, 0x54, 0xA8)),
 
@@ -86,7 +87,7 @@ CARS = {
         color=(0x16, 0x1A, 0x1F)),
     "gtr": dict(
         tr="Nissan GT-R", en="Nissan GT-R", klass="sport",
-        chassis="chassis_sport", engine="engine_v6", trans="transmission_sport",
+        chassis="chassis_sport", engine="engine_i6", trans="transmission_sport",
         wheel="wheel_sport", top_kmh=315, accel=2.9, mass=1750, fuel=74,
         color=(0x6E, 0x76, 0x82)),
     "porsche_911": dict(
@@ -115,7 +116,7 @@ CARS = {
     # --- Klasik / Kamyonet --------------------------------------------------
     "beetle": dict(
         tr="Volkswagen Beetle", en="Volkswagen Beetle", klass="classic",
-        chassis="chassis_classic", engine="engine_i4", trans="transmission_manual",
+        chassis="chassis_classic", engine="engine_flat4", trans="transmission_manual",
         wheel="wheel_street", top_kmh=130, accel=17.5, mass=820, fuel=40,
         color=(0x62, 0xA8, 0xD8)),
     "c10": dict(
@@ -125,7 +126,7 @@ CARS = {
         color=(0x2E, 0x6B, 0x52)),
     "transporter": dict(
         tr="Volkswagen Transporter T1", en="Volkswagen Transporter T1", klass="van",
-        chassis="chassis_van", engine="engine_i4", trans="transmission_manual",
+        chassis="chassis_van", engine="engine_flat4", trans="transmission_manual",
         wheel="wheel_street", top_kmh=105, accel=22.0, mass=1180, fuel=42,
         color=(0xC4, 0x5A, 0x3A)),
 }
@@ -192,12 +193,6 @@ BLOCKS = {
 # --------------------------------------------------------------------------
 # id -> (tr açıklama, süre sn, döngü mü)
 SOUNDS = {
-    "engine_idle":       ("Rölanti", 2.0, True),
-    "engine_loop_i4":    ("4 silindir motor", 2.0, True),
-    "engine_loop_i6":    ("6 silindir sıra motor", 2.0, True),
-    "engine_loop_v6":    ("V6 motor", 2.0, True),
-    "engine_loop_v8":    ("V8 motor", 2.0, True),
-    "engine_loop_flat6": ("Boksör 6 motor", 2.0, True),
     "engine_start":      ("Marş", 1.4, False),
     "engine_stop":       ("Motor durdurma", 0.9, False),
     "horn":              ("Korna", 0.7, False),
@@ -208,14 +203,17 @@ SOUNDS = {
     "wrench_use":        ("Anahtar sesi", 0.6, False),
 }
 
-# Motor id -> ses id eşlemesi
-ENGINE_SOUND = {
-    "engine_i4": "engine_loop_i4",
-    "engine_i6": "engine_loop_i6",
-    "engine_v6": "engine_loop_v6",
-    "engine_v8": "engine_loop_v8",
-    "engine_flat6": "engine_loop_flat6",
-}
+# Motor sesleri gerçek araç kayıtlarından üretilir (tools/import_engine_sounds.py,
+# kaynak tablosu tools/sound_sources.py). Her aracın kendi kaydı vardır; "v6"
+# yalnızca modifiyeyle V6 takılan araçlar içindir. Her ses üç devir katmanından
+# oluşur. Java'da EngineVoice enum'u ile eşleşir.
+ENGINE_VOICES = list(CARS) + ["v6"]
+ENGINE_LAYERS = ["idle", "mid", "high"]
+
+
+def engine_voice_sounds():
+    """ses olayı id -> dosya yolu (sounds/ altında, uzantısız)."""
+    return {f"engine_{v}_{layer}": f"engine/{v}_{layer}" for v in ENGINE_VOICES for layer in ENGINE_LAYERS}
 
 
 def car_item_id(car_id: str) -> str:

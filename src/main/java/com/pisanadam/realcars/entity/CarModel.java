@@ -39,7 +39,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.80F, 1.1F)
 			.build()),
 	CAR_BMW_M3("car_bmw_m3", CarClass.SEDAN, 290, 4.1F, 1730, 59, 0x1B54A8,
-		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
+		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		Body.of(Silhouette.NOTCHBACK, 77.0F, 30.5F)
 			.stance(5.0F, 46.0F, 0.0F)
 			.nose(14.0F).cowl(-11.0F, 16.5F)
@@ -59,7 +59,7 @@ public enum CarModel implements StringRepresentable {
 			.cabin(0.74F, 2.0F)
 			.build()),
 	CAR_GTR("car_gtr", CarClass.SPORT, 315, 2.9F, 1750, 74, 0x6E7682,
-		EngineType.ENGINE_V6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
+		EngineType.ENGINE_I6, TransmissionType.TRANSMISSION_SPORT, WheelType.WHEEL_SPORT, ChassisType.CHASSIS_SPORT,
 		Body.of(Silhouette.FASTBACK, 75.0F, 30.5F)
 			.stance(4.5F, 44.5F, 1.0F)
 			.nose(13.0F).cowl(-9.0F, 15.5F)
@@ -109,7 +109,7 @@ public enum CarModel implements StringRepresentable {
 
 	// --- Klasik / Kamyonet --------------------------------------------------
 	CAR_BEETLE("car_beetle", CarClass.CLASSIC, 130, 17.5F, 820, 40, 0x62A8D8,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_CLASSIC,
+		EngineType.ENGINE_FLAT4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_CLASSIC,
 		Body.of(Silhouette.ROUNDED, 65.0F, 25.0F)
 			.stance(6.0F, 38.0F, 0.0F)
 			.nose(11.0F).cowl(-11.0F, 15.0F)
@@ -129,7 +129,7 @@ public enum CarModel implements StringRepresentable {
 			.chrome()
 			.build()),
 	CAR_TRANSPORTER("car_transporter", CarClass.VAN, 105, 22.0F, 1180, 42, 0xC45A3A,
-		EngineType.ENGINE_I4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_VAN,
+		EngineType.ENGINE_FLAT4, TransmissionType.TRANSMISSION_MANUAL, WheelType.WHEEL_STREET, ChassisType.CHASSIS_VAN,
 		// Burunsuz: ön cam neredeyse ön aksın üstünde, yan duvar dimdik.
 		Body.of(Silhouette.FORWARD_CONTROL, 68.0F, 27.5F)
 			.stance(6.5F, 38.0F, -2.0F)

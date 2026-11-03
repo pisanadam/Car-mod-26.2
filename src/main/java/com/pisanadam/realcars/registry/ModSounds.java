@@ -1,7 +1,7 @@
 package com.pisanadam.realcars.registry;
 
 import com.pisanadam.realcars.RealCars;
-import com.pisanadam.realcars.entity.EngineType;
+import com.pisanadam.realcars.entity.EngineVoice;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.Registry;
@@ -9,9 +9,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
-/** Modun sesleri — dosyalar {@code tools/gen_sounds.py} tarafından üretilir. */
+/**
+ * Modun sesleri. Motor sesleri gerçek araç kayıtlarından
+ * ({@code tools/import_engine_sounds.py}), diğerleri sentezle
+ * ({@code tools/gen_sounds.py}) üretilir.
+ */
 public final class ModSounds {
-	public static final SoundEvent ENGINE_IDLE = register("engine_idle");
 	public static final SoundEvent ENGINE_START = register("engine_start");
 	public static final SoundEvent ENGINE_STOP = register("engine_stop");
 	public static final SoundEvent HORN = register("horn");
@@ -21,12 +24,17 @@ public final class ModSounds {
 	public static final SoundEvent DOOR_CLOSE = register("door_close");
 	public static final SoundEvent WRENCH_USE = register("wrench_use");
 
-	/** Her motor tipinin kendi döngü sesi vardır (silindir sayısına göre farklı). */
-	private static final Map<EngineType, SoundEvent> ENGINE_LOOPS = new EnumMap<>(EngineType.class);
+	/** Her motor sesinin (araç kaydı) üç katmanı: rölanti, orta ve yüksek devir. */
+	private static final Map<EngineVoice, Map<EngineVoice.Layer, SoundEvent>> ENGINE_LAYERS =
+		new EnumMap<>(EngineVoice.class);
 
 	static {
-		for (final EngineType engine : EngineType.values()) {
-			ENGINE_LOOPS.put(engine, register(engine.soundName()));
+		for (final EngineVoice voice : EngineVoice.values()) {
+			final Map<EngineVoice.Layer, SoundEvent> layers = new EnumMap<>(EngineVoice.Layer.class);
+			for (final EngineVoice.Layer layer : EngineVoice.Layer.values()) {
+				layers.put(layer, register(voice.soundName(layer)));
+			}
+			ENGINE_LAYERS.put(voice, layers);
 		}
 	}
 
@@ -38,8 +46,8 @@ public final class ModSounds {
 		return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(id));
 	}
 
-	public static SoundEvent engineLoop(final EngineType engine) {
-		return ENGINE_LOOPS.get(engine);
+	public static SoundEvent engineLayer(final EngineVoice voice, final EngineVoice.Layer layer) {
+		return ENGINE_LAYERS.get(voice).get(layer);
 	}
 
 	public static void init() {

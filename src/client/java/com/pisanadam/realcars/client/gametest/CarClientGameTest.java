@@ -4,7 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.pisanadam.realcars.RealCars;
 import com.pisanadam.realcars.client.render.CarEntityRenderer;
 import com.pisanadam.realcars.entity.CarEntity;
+import com.pisanadam.realcars.client.sound.CarSoundManager;
+import com.pisanadam.realcars.client.sound.EngineVoiceProfiles;
 import com.pisanadam.realcars.entity.CarModel;
+import com.pisanadam.realcars.entity.EngineVoice;
 import com.pisanadam.realcars.entity.SpoilerType;
 import com.pisanadam.realcars.entity.WheelType;
 import com.pisanadam.realcars.recipe.ModRecipeBook;
@@ -280,6 +283,28 @@ public class CarClientGameTest implements FabricClientGameTest {
 		});
 	}
 
+	/**
+	 * Çalışan motorun, aracın kendi gerçek kaydıyla çaldığını doğrular. Ses
+	 * sistemi başsız makinede kapalı olsa da ses yöneticisi hangi kaydı
+	 * seçtiğini tutar.
+	 */
+	private static void checkEngineVoice(final ClientGameTestContext context, final EngineVoice expected) {
+		context.runOnClient(client -> {
+			if (!(client.player.getVehicle() instanceof CarEntity car)) {
+				throw new AssertionError("Motor sesi sınanamadı: oyuncu araçta değil");
+			}
+			final EngineVoice playing = CarSoundManager.playingVoice(car);
+			if (playing != expected) {
+				throw new AssertionError("Motor sesi " + expected + " olmalıydı, çalan: " + playing);
+			}
+			final float[] rpms = EngineVoiceProfiles.layerRpms(playing);
+			if (!(rpms[0] < rpms[1] && rpms[1] < rpms[2])) {
+				throw new AssertionError("Motor sesi katman devirleri bozuk: " + java.util.Arrays.toString(rpms));
+			}
+			RealCars.LOGGER.info("Motor sesi: {} katmanlar {} d/dk", playing, java.util.Arrays.toString(rpms));
+		});
+	}
+
 	/** On iki aracı bir sıra hâlinde çıkarır. */
 	private static void spawnEveryCar(final ClientGameTestContext context,
 									  final TestSingleplayerContext singleplayer) {
@@ -390,6 +415,7 @@ public class CarClientGameTest implements FabricClientGameTest {
 			throw new AssertionError("Motor tuşuyla motor çalışmadı");
 		}
 		context.waitTicks(15);
+		checkEngineVoice(context, EngineVoice.BMW_M3);
 		context.takeScreenshot("92-gosterge");
 
 		checkReverse(context);

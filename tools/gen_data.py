@@ -77,6 +77,8 @@ ENGINE_RECIPES = {
                                              "D": "minecraft:diamond", "R": "minecraft:redstone_block"}),
     "engine_flat6": (["P_P", "SIS", "SCS"], {"P": "minecraft:piston", "S": S,
                                              "I": "minecraft:iron_block", "C": "minecraft:copper_block"}),
+    "engine_flat4": (["_P_", "SCS", "SRS"], {"P": "minecraft:piston", "S": S,
+                                             "C": "minecraft:copper_block", "R": "minecraft:redstone_block"}),
 }
 
 TRANSMISSION_RECIPES = {
@@ -375,6 +377,12 @@ def gen_sounds_json():
             "subtitle": f"subtitles.{NS}.{sid}",
             "sounds": [{"name": f"{NS}:{sid}", "stream": False}],
         }
+    # Motor kayıtları: bütün katmanlar aynı altyazıyı paylaşır.
+    for sid, path in spec.engine_voice_sounds().items():
+        obj[sid] = {
+            "subtitle": f"subtitles.{NS}.engine_running",
+            "sounds": [{"name": f"{NS}:{path}", "stream": False, "attenuation_distance": 32}],
+        }
     write(ASSETS / "sounds.json", obj)
 
 
@@ -383,12 +391,7 @@ def gen_sounds_json():
 # ==========================================================================
 
 SUBTITLES_TR = {
-    "engine_idle": "Motor rölantide",
-    "engine_loop_i4": "Motor çalışıyor",
-    "engine_loop_i6": "Motor çalışıyor",
-    "engine_loop_v6": "Motor çalışıyor",
-    "engine_loop_v8": "Motor gürlüyor",
-    "engine_loop_flat6": "Motor çalışıyor",
+    "engine_running": "Motor çalışıyor",
     "engine_start": "Motor çalıştırılıyor",
     "engine_stop": "Motor durduruluyor",
     "horn": "Korna",
@@ -400,12 +403,7 @@ SUBTITLES_TR = {
 }
 
 SUBTITLES_EN = {
-    "engine_idle": "Engine idles",
-    "engine_loop_i4": "Engine runs",
-    "engine_loop_i6": "Engine runs",
-    "engine_loop_v6": "Engine runs",
-    "engine_loop_v8": "Engine rumbles",
-    "engine_loop_flat6": "Engine runs",
+    "engine_running": "Engine runs",
     "engine_start": "Engine starts",
     "engine_stop": "Engine stops",
     "horn": "Horn honks",

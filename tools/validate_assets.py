@@ -172,8 +172,15 @@ def check_tags():
 
 def check_sounds():
     obj = load(ASSETS / "sounds.json") or {}
-    if set(obj) != set(spec.SOUNDS):
-        err(f"sounds.json spec ile uyuşmuyor: {sorted(set(obj) ^ set(spec.SOUNDS))}")
+    expected = set(spec.SOUNDS) | set(spec.engine_voice_sounds())
+    if set(obj) != expected:
+        err(f"sounds.json spec ile uyuşmuyor: {sorted(set(obj) ^ expected)}")
+    voices = load(ASSETS / "engine_voices.json") or {}
+    for v in spec.ENGINE_VOICES:
+        if v not in voices:
+            err(f"engine_voices.json içinde {v} yok (python3 tools/import_engine_sounds.py)")
+        elif not (1.0 < voices[v]["mid"] < voices[v]["high"]):
+            err(f"engine_voices.json: {v} katman oranları bozuk")
     tr = load(ASSETS / "lang/tr_tr.json") or {}
     for sid, entry in obj.items():
         for s in entry["sounds"]:
@@ -208,6 +215,17 @@ def check_java_enums():
             err(f"{rel}: spec'te olup Java'da olmayan sabitler: {sorted(missing)}")
         if extra:
             err(f"{rel}: Java'da olup spec'te olmayan sabitler: {sorted(extra)}")
+
+
+def check_engine_voices():
+    """EngineVoice enum'u (parantezsiz sabitler) spec.ENGINE_VOICES ile aynı mı?"""
+    text = (JAVA / "entity/EngineVoice.java").read_text(encoding="utf-8")
+    body = text[text.index("public enum EngineVoice {") + len("public enum EngineVoice {"):]
+    body = re.sub(r"/\*\*.*?\*/", "", body[:body.index(";")], flags=re.S)
+    found = {name.strip() for name in body.split(",") if name.strip()}
+    expected = {v.upper() for v in spec.ENGINE_VOICES}
+    if found != expected:
+        err(f"EngineVoice.java spec ile uyuşmuyor: {sorted(found ^ expected)}")
 
 
 def check_hd_models():
@@ -273,6 +291,7 @@ def check_hd_models():
 def main():
     check_json_parses()
     check_hd_models()
+    check_engine_voices()
     check_items()
     check_block_models()
     check_recipes()

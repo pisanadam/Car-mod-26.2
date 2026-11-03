@@ -27,3 +27,4 @@ run/
 __pycache__/
 *.pyc
 tools/.hd_cache/
+tools/.snd_cache/

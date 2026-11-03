@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """RealCars ses üreticisi.
 
-Motor sesleri spektral (FFT) sentezle üretilir: dalga biçimi doğrudan frekans
+Motor döngüleri artık gerçek araç kayıtlarından gelir
+(tools/import_engine_sounds.py); buradaki motor sentezi yalnızca marş ve
+durdurma seslerini besler. Sesler spektral (FFT) sentezle üretilir: dalga biçimi doğrudan frekans
 alanında kurulur ve ters FFT ile zamana çevrilir. Bu yöntem üretilen tamponun
 tam olarak periyodik olmasını garanti eder, yani döngü noktasında hiçbir "tık"
 duyulmaz — motor sesi kesintisiz döner.
@@ -295,10 +297,6 @@ def idle_loop(seconds=2.0):
 
 def main():
     made = {}
-    for name, voice in ENGINE_VOICES.items():
-        secs = spec.SOUNDS[name][1]
-        made[name] = _write(name, engine_loop(voice, secs, seed=hash(name) % 9999))
-    made["engine_idle"] = _write("engine_idle", idle_loop(spec.SOUNDS["engine_idle"][1]))
     made["engine_start"] = _write("engine_start", engine_start(spec.SOUNDS["engine_start"][1]))
     made["engine_stop"] = _write("engine_stop", engine_stop(spec.SOUNDS["engine_stop"][1]))
     made["horn"] = _write("horn", horn(spec.SOUNDS["horn"][1]))
