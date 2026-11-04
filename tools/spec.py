@@ -193,8 +193,6 @@ BLOCKS = {
 # --------------------------------------------------------------------------
 # id -> (tr açıklama, süre sn, döngü mü)
 SOUNDS = {
-    "engine_start":      ("Marş", 1.4, False),
-    "engine_stop":       ("Motor durdurma", 0.9, False),
     "horn":              ("Korna", 0.7, False),
     "brake_squeal":      ("Fren gıcırtısı", 0.8, False),
     "gravel_loop":       ("Çakıl/toprak sürüş", 1.5, True),
@@ -206,14 +204,14 @@ SOUNDS = {
 # Motor sesleri gerçek araç kayıtlarından üretilir (tools/import_engine_sounds.py,
 # kaynak tablosu tools/sound_sources.py). Her aracın kendi kaydı vardır; "v6"
 # yalnızca modifiyeyle V6 takılan araçlar içindir. Her ses üç devir katmanından
-# oluşur. Java'da EngineVoice enum'u ile eşleşir.
+# oluşur; marş ve kapatma da aynı kayıtlardan. Java'da EngineVoice enum'u ile eşleşir.
 ENGINE_VOICES = list(CARS) + ["v6"]
 ENGINE_LAYERS = ["idle", "mid", "high"]
 
 
 def engine_voice_sounds():
     """ses olayı id -> dosya yolu (sounds/ altında, uzantısız)."""
-    return {f"engine_{v}_{layer}": f"engine/{v}_{layer}" for v in ENGINE_VOICES for layer in ENGINE_LAYERS}
+    return {f"engine_{v}_{part}": f"engine/{v}_{part}" for v in ENGINE_VOICES for part in ENGINE_LAYERS + ["start", "stop"]}
 
 
 def car_item_id(car_id: str) -> str:

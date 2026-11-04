@@ -22,6 +22,7 @@ Adımlar:
 
 Çıktı:
   src/main/resources/assets/realcars/sounds/engine/<ses>_<katman>.ogg
+  src/main/resources/assets/realcars/sounds/engine/<ses>_start.ogg / _stop.ogg  (marş, kapatma)
   src/main/resources/assets/realcars/engine_voices.json   (katman devir oranları)
   CREDITS.md                                              (atıflar)
 
@@ -227,6 +228,57 @@ def resample(x, factor):
     return np.interp(np.arange(0, len(x) - 1, factor), np.arange(len(x)), x)
 
 
+def even_envelope(loop, window=0.08, strength=0.7):
+    """Döngü içindeki ses yüksekliği dalgalanmasını yumuşatır. Kısa bir
+    döngüde her tekrarda duyulan "vuv vuv" kabarması sesi makine gibi
+    gösterir; zarf ~80 ms ölçeğinde kısmen düzleştirilir, ateşleme
+    darbeleri (daha kısa ölçek) korunur. Hesap döngünün kendisi üzerinde
+    dairesel yapılır ki dikiş bozulmasın."""
+    from scipy.ndimage import uniform_filter1d
+
+    n = len(loop)
+    tiled = np.tile(loop, 3)
+    env = np.sqrt(uniform_filter1d(tiled ** 2, int(window * SR)) + 1e-12)[n:2 * n]
+    gain = np.clip((env.mean() / env) ** strength, 0.5, 2.0)
+    return loop * gain
+
+
+def cut(spec, fade_out):
+    d = load(download(spec["rec"]))
+    t0, t1 = spec["t"]
+    x = highpass(d[int(t0 * SR):int(t1 * SR)].copy())
+    fi = int(0.008 * SR)
+    x[:fi] *= np.linspace(0, 1, fi)
+    fo = min(int(fade_out * SR), len(x) // 2)
+    x[-fo:] *= np.cos(np.linspace(0, np.pi / 2, fo)) ** 2
+    return x
+
+
+def run_down(idle_loop, seconds=1.3):
+    """Motor kapanırken devir düşer, ateşlemeler seyrekleşip söner: rölanti
+    döngüsü giderek yavaşlayan hızla çalınır ve sönümlenir."""
+    base = np.tile(idle_loop, int(np.ceil(3 * SR / len(idle_loop))))
+    n = int(seconds * SR)
+    t = np.arange(n) / n
+    rate = 1.0 - 0.68 * t ** 1.4            # devir rölantiden ~%30'a düşer
+    pos = np.cumsum(rate)
+    x = np.interp(pos, np.arange(len(base)), base)
+    env = (1.0 - t) ** 1.6 * np.minimum(1.0, rate / 0.6)
+    fi = int(0.01 * SR)
+    env[:fi] *= np.linspace(0, 1, fi)
+    return x * env
+
+
+def write_event(name, x, peak_rms):
+    """En gür 0.2 sn'nin RMS'i peak_rms olacak şekilde ölçekleyip yazar."""
+    import soundfile as sf
+    from scipy.ndimage import uniform_filter1d
+
+    loud = np.sqrt(uniform_filter1d(x ** 2, int(0.2 * SR)).max() + 1e-12)
+    x = np.clip(x / loud * peak_rms, -0.98, 0.98)
+    sf.write(str(OUT / (name + ".ogg")), x.astype(np.float32), SR, format="OGG", subtype="VORBIS")
+
+
 def convert(voice, src):
     """Her katmanın kaydı ve saniye aralığı kaynak tablosunda elle seçilir
     (spektrograma bakılarak); devir oranı için kaba bir tahmin verilir.
@@ -268,9 +320,23 @@ def convert(voice, src):
     if not (ratios["mid"] > 1.08 and ratios["high"] > ratios["mid"] * 1.08):
         raise RuntimeError("%s: katmanlar devirde sıralı değil %s" % (voice, ratios))
     for layer, loop in loops.items():
+        loop = even_envelope(loop)
         loop = np.clip(loop / (np.sqrt(np.mean(loop ** 2)) + 1e-9) * LOOP_RMS, -0.98, 0.98)
         sf.write(str(OUT / ("%s_%s.ogg" % (voice, layer))), loop.astype(np.float32), SR,
                  format="OGG", subtype="VORBIS")
+
+    # Marş: kaydın kendisi (marş motoru, ilk ateşleme, devrin parlayıp
+    # oturması). Oyunda rölanti döngüsü bunun altında açılır, bu yüzden son
+    # yarım saniyede yumuşakça söner.
+    start = cut(src["start"], fade_out=0.6)
+    write_event(voice + "_start", start, peak_rms=0.32)
+    # Kapatma: gerçek kayıt varsa o, yoksa aracın kendi rölantisi devri
+    # düşerek sönen motor olarak.
+    if src.get("stop"):
+        stop = cut(src["stop"], fade_out=0.3)
+    else:
+        stop = run_down(loops["idle"])
+    write_event(voice + "_stop", stop, peak_rms=0.24)
     print("  %-12s orta ×%.2f (tahmin %.2f), yüksek ×%.2f (tahmin %.2f)  %s" % (
         voice, ratios["mid"], src["ratios"]["mid"], ratios["high"], src["ratios"]["high"], report))
     return dict(mid=round(ratios["mid"], 3), high=round(ratios["high"], 3))
@@ -295,8 +361,9 @@ def credits_section():
                 "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/"}
     used = {}
     for voice, cfg in sound_sources.VOICES.items():
-        for layer in cfg["layers"].values():
-            used.setdefault(layer["rec"], []).append(voice)
+        parts = list(cfg["layers"].values()) + [cfg["start"]] + ([cfg["stop"]] if cfg.get("stop") else [])
+        for part in parts:
+            used.setdefault(part["rec"], []).append(voice)
     lines = [
         "",
         "## Motor sesleri",
@@ -304,7 +371,8 @@ def credits_section():
         "Motor sesleri aşağıdaki gerçek kayıtlardan üretilmiştir (Freesound; Hugging Face'teki",
         "[lisans bilgili aynasından](https://huggingface.co/datasets/%s) indirildi)." % sound_sources.FREESOUND_MIRROR,
         "Her kayıttan rölanti, orta ve yüksek devir döngüleri kesildi, perdesi harmonik çizgi",
-        "izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi",
+        "izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi; marş sesleri de",
+        "kayıtların kendi marş anlarından kesildi",
         "(`tools/import_engine_sounds.py`).",
         "",
         "| Ses | Kayıt | Yazar | Lisans |",

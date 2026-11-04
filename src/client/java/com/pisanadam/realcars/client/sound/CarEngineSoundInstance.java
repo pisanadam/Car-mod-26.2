@@ -115,6 +115,19 @@ public class CarEngineSoundInstance extends AbstractTickableSoundInstance {
 		return (float) (idle * Math.pow(rpm / idle, Math.min(1.0, gamma)));
 	}
 
+	/**
+	 * Gerçek bir motor sabit devirde bile kusursuz dönmez: rölanti hafifçe
+	 * dalgalanır, yanma her çevrimde biraz farklıdır. Döngü kaydı ise birebir
+	 * tekrar eder ve kulağa makine gibi gelir. Bu yüzden perdeye binde birkaç
+	 * oranında, birbirinin katı olmayan iki yavaş salınım eklenir. Üç katman
+	 * aynı salınımı paylaşır (araca bağlı); yoksa birbirlerinden kayıp
+	 * yankılanırlardı.
+	 */
+	static float wobble(final CarEntity car) {
+		final float t = (car.tickCount + (car.getId() % 97)) / 20.0F;
+		return 1.0F + 0.0045F * Mth.sin(t * 0.83F) + 0.003F * Mth.sin(t * 2.31F + 1.3F);
+	}
+
 	@Override
 	public void tick() {
 		if (this.car.isRemoved() || !this.car.engineOn()) {
@@ -129,7 +142,7 @@ public class CarEngineSoundInstance extends AbstractTickableSoundInstance {
 		final int rpm = Math.max(GearBox.IDLE_RPM, this.car.rpm());
 		this.smoothedRpm = Mth.lerp(0.22F, this.smoothedRpm, soundRpm(rpm, this.car.engineType().redlineRpm()));
 		final int index = this.layer.ordinal();
-		this.pitch = Mth.clamp(this.smoothedRpm / this.layerRpms[index], MIN_PITCH, MAX_PITCH);
+		this.pitch = Mth.clamp(this.smoothedRpm * wobble(this.car) / this.layerRpms[index], MIN_PITCH, MAX_PITCH);
 
 		// Yüksek devirde motor daha gür duyulur, rölantide sadece mırıldanır.
 		final float load = Mth.clamp((rpm - GearBox.IDLE_RPM)

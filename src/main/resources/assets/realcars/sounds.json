@@ -1,22 +1,4 @@
 {
-  "engine_start": {
-    "subtitle": "subtitles.realcars.engine_start",
-    "sounds": [
-      {
-        "name": "realcars:engine_start",
-        "stream": false
-      }
-    ]
-  },
-  "engine_stop": {
-    "subtitle": "subtitles.realcars.engine_stop",
-    "sounds": [
-      {
-        "name": "realcars:engine_stop",
-        "stream": false
-      }
-    ]
-  },
   "horn": {
     "subtitle": "subtitles.realcars.horn",
     "sounds": [
@@ -101,6 +83,26 @@
       }
     ]
   },
+  "engine_golf_gti_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/golf_gti_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_golf_gti_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/golf_gti_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_corolla_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -126,6 +128,26 @@
     "sounds": [
       {
         "name": "realcars:engine/corolla_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_corolla_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/corolla_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_corolla_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/corolla_stop",
         "stream": false,
         "attenuation_distance": 32
       }
@@ -161,6 +183,26 @@
       }
     ]
   },
+  "engine_bmw_m3_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/bmw_m3_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_bmw_m3_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/bmw_m3_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_mustang_gt_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -186,6 +228,26 @@
     "sounds": [
       {
         "name": "realcars:engine/mustang_gt_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_mustang_gt_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/mustang_gt_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_mustang_gt_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/mustang_gt_stop",
         "stream": false,
         "attenuation_distance": 32
       }
@@ -221,6 +283,26 @@
       }
     ]
   },
+  "engine_gtr_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/gtr_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_gtr_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/gtr_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_porsche_911_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -246,6 +328,26 @@
     "sounds": [
       {
         "name": "realcars:engine/porsche_911_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_porsche_911_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/porsche_911_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_porsche_911_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/porsche_911_stop",
         "stream": false,
         "attenuation_distance": 32
       }
@@ -281,6 +383,26 @@
       }
     ]
   },
+  "engine_wrangler_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/wrangler_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_wrangler_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/wrangler_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_hilux_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -306,6 +428,26 @@
     "sounds": [
       {
         "name": "realcars:engine/hilux_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_hilux_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/hilux_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_hilux_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/hilux_stop",
         "stream": false,
         "attenuation_distance": 32
       }
@@ -341,6 +483,26 @@
       }
     ]
   },
+  "engine_defender_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/defender_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_defender_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/defender_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_beetle_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -366,6 +528,26 @@
     "sounds": [
       {
         "name": "realcars:engine/beetle_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_beetle_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/beetle_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_beetle_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/beetle_stop",
         "stream": false,
         "attenuation_distance": 32
       }
@@ -401,6 +583,26 @@
       }
     ]
   },
+  "engine_c10_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/c10_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_c10_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/c10_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_transporter_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -431,6 +633,26 @@
       }
     ]
   },
+  "engine_transporter_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/transporter_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_transporter_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/transporter_stop",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "engine_v6_idle": {
     "subtitle": "subtitles.realcars.engine_running",
     "sounds": [
@@ -456,6 +678,26 @@
     "sounds": [
       {
         "name": "realcars:engine/v6_high",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_v6_start": {
+    "subtitle": "subtitles.realcars.engine_start",
+    "sounds": [
+      {
+        "name": "realcars:engine/v6_start",
+        "stream": false,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "engine_v6_stop": {
+    "subtitle": "subtitles.realcars.engine_stop",
+    "sounds": [
+      {
+        "name": "realcars:engine/v6_stop",
         "stream": false,
         "attenuation_distance": 32
       }

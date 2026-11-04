@@ -36,7 +36,8 @@ yazarları ve bu mod o üreticilerle bağlantılı değildir.
 Motor sesleri aşağıdaki gerçek kayıtlardan üretilmiştir (Freesound; Hugging Face'teki
 [lisans bilgili aynasından](https://huggingface.co/datasets/benjamin-paine/freesound-laion-640k) indirildi).
 Her kayıttan rölanti, orta ve yüksek devir döngüleri kesildi, perdesi harmonik çizgi
-izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi
+izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi; marş sesleri de
+kayıtların kendi marş anlarından kesildi
 (`tools/import_engine_sounds.py`).
 
 | Ses | Kayıt | Yazar | Lisans |
@@ -44,18 +45,26 @@ izlenerek sabitlendi ve döngü noktası çapraz geçişle birleştirildi
 | `golf_gti` | [SFX Car Engine Outside Idle](https://freesound.org/s/401552/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `golf_gti` | [SFX Car Engine Outside RPMMed](https://freesound.org/s/401555/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `golf_gti` | [SFX Car Engine Outside RPMHigh](https://freesound.org/s/401551/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `golf_gti` | [SFX Car Engine Outside Start](https://freesound.org/s/401558/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `golf_gti` | [SFX Car Engine Outside Stop](https://freesound.org/s/401557/) | GiocoSound | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `corolla` | [4A-GE Engine Starting and Loop](https://freesound.org/s/509628/) | qopsinonstudios | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `corolla` | [4A-GE Engine Loop 1](https://freesound.org/s/509626/) | qopsinonstudios | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `corolla` | [4A-GE Engine Loop 2](https://freesound.org/s/509627/) | qopsinonstudios | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `bmw_m3` | [BMWM3 01](https://freesound.org/s/415276/) | ikbenraar | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `mustang_gt` | [ford mustang v8 rear 2](https://freesound.org/s/384058/) | pastori666 | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `mustang_gt` | [Starting of Ford V8 5 Liter engine](https://freesound.org/s/455925/) | noiseloop | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
 | `gtr` | [1953 Studebaker Idle up to 6000rpm](https://freesound.org/s/238847/) | lonemonk | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
 | `porsche_911` | [Porsche idle](https://freesound.org/s/113216/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `porsche_911` | [Porsche Exhaust](https://freesound.org/s/113214/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `porsche_911` | [Ignition Porsche growl](https://freesound.org/s/113200/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| `porsche_911` | [Porsche off growl](https://freesound.org/s/113217/) | victormalloy | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `wrangler` | [Jeep in the Mountians #1](https://freesound.org/s/253439/) | deleted_user_4401185 | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `v6`, `wrangler` | [Vitara V6 engine](https://freesound.org/s/249720/) | Keith Selmes | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
 | `hilux` | [Diesel Start-Idle-Revs MZ000004](https://freesound.org/s/443319/) | DAVESTALKER | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `defender` | [Renault Master F3500 dCi135 Engine Start Up Idle Gas Pressing And Shut Down Mono](https://freesound.org/s/425845/) | Soundholder | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `defender` | [diesel starting and idling](https://freesound.org/s/264870/) | paulmessier | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `beetle` | [Volkswagen Beetle 1961](https://freesound.org/s/544344/) | klankbeeld | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `beetle` | [1970 VW Bug Engine Starting Sputtering](https://freesound.org/s/579211/) | bowlingballout | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `c10` | [Chev 350 rev and idle](https://freesound.org/s/123685/) | lonemonk | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
 | `transporter` | [Volkswagen Type 2 revving up2](https://freesound.org/s/332695/) | nhaudio | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |
-| `v6` | [Vitara V6 engine](https://freesound.org/s/249720/) | Keith Selmes | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `transporter` | [Volkswagen Type 2 1 starting](https://freesound.org/s/275403/) | nhaudio | [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) |

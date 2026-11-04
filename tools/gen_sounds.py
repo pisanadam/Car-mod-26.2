@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-"""RealCars ses üreticisi.
+"""RealCars ses üreticisi: korna, fren, çarpışma, kapı, anahtar ve toprak sesleri.
 
-Motor döngüleri artık gerçek araç kayıtlarından gelir
-(tools/import_engine_sounds.py); buradaki motor sentezi yalnızca marş ve
-durdurma seslerini besler. Sesler spektral (FFT) sentezle üretilir: dalga biçimi doğrudan frekans
-alanında kurulur ve ters FFT ile zamana çevrilir. Bu yöntem üretilen tamponun
-tam olarak periyodik olmasını garanti eder, yani döngü noktasında hiçbir "tık"
-duyulmaz — motor sesi kesintisiz döner.
-
-Motor sesi tek bir referans devirde (REF_RPM) üretilir; oyun içinde gerçek
-devre göre perdesi (pitch) değiştirilerek 800-7500 d/dk aralığı kaplanır.
+Motor sesleri (döngüler, marş, kapatma) gerçek kayıtlardan gelir:
+tools/import_engine_sounds.py. Buradaki sesler spektral (FFT) sentezle
+üretilir; döngülerde tampon tam periyodik olduğu için dikişte tık duyulmaz.
 
 Çıktı: src/main/resources/assets/realcars/sounds/*.ogg
 """
@@ -27,22 +21,6 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SND = ROOT / "src/main/resources/assets" / spec.MOD_ID / "sounds"
 
 SR = 44100
-REF_RPM = 3000.0   # motor döngüsünün üretildiği referans devir
-
-# id -> (silindir, sertlik, egzoz gürültüsü, yarım-mertebe içeriği)
-#   sertlik          : yüksek harmoniklerin gücü (tiz/agresiflik)
-#   egzoz gürültüsü  : bant sınırlı gürültünün seviyesi
-#   yarım-mertebe    : V8'lerin karakteristik "burble" sesini veren, ateşleme
-#                      mertebesinin yarısındaki bileşenlerin gücü
-ENGINE_VOICES = {
-    "engine_loop_i4":    dict(cyl=4, harsh=0.72, noise=0.16, halforder=0.06),
-    "engine_loop_i6":    dict(cyl=6, harsh=0.52, noise=0.11, halforder=0.04),
-    "engine_loop_v6":    dict(cyl=6, harsh=0.66, noise=0.15, halforder=0.14),
-    "engine_loop_v8":    dict(cyl=8, harsh=0.80, noise=0.20, halforder=0.34),
-    "engine_loop_flat6": dict(cyl=6, harsh=0.62, noise=0.18, halforder=0.10),
-}
-
-
 # --------------------------------------------------------------------------
 # Yardımcılar
 # --------------------------------------------------------------------------
@@ -108,101 +86,6 @@ def _band_noise(n, lo, hi, seed, tilt=0.0):
 # --------------------------------------------------------------------------
 # Motor döngüsü
 # --------------------------------------------------------------------------
-
-def engine_loop(voice, seconds=2.0, seed=0):
-    """Kusursuz döngülenen motor sesi üretir.
-
-    Krank frekansının yarısı (f_half) taban alınır; böylece hem tam mertebeler
-    (ateşleme darbeleri) hem de yarım mertebeler (V motorların burble sesi)
-    tamsayı FFT bin'lerine denk gelir ve tampon tam periyodik olur.
-    """
-    n = int(seconds * SR)
-    n -= n % 2
-    f_crank = REF_RPM / 60.0                 # d/dk -> Hz
-    f_half = f_crank / 2.0
-    bin_hz = SR / n
-    # f_half'i tam bir bin'e oturt ki tüm katları da tam bin olsun
-    k_half = max(1, int(round(f_half / bin_hz)))
-    f_half = k_half * bin_hz
-
-    order_firing = voice["cyl"] / 2.0        # 4 zamanlı: devir başına ateşleme
-    nf = n // 2 + 1
-    mag = np.zeros(nf)
-    rng = _rng(seed)
-    phase = rng.uniform(0, 2 * np.pi, nf)
-
-    for m in range(1, 220):                  # f_half'in katları
-        k = m * k_half
-        if k >= nf:
-            break
-        order = m / 2.0                      # krank mertebesi
-        # temel sönüm
-        amp = 1.0 / (order ** (1.55 - 0.75 * voice["harsh"]))
-        # ateşleme mertebesi ve katları öne çıkar
-        if abs(order / order_firing - round(order / order_firing)) < 1e-6:
-            amp *= 3.4
-        elif abs(m % 2) > 0:                 # yarım mertebeler (burble)
-            amp *= voice["halforder"]
-        else:
-            amp *= 0.45
-        # tiz bölgede yumuşak kesim (rezonatör/susturucu etkisi)
-        f = k * bin_hz
-        amp *= 1.0 / (1.0 + (f / (900.0 + 2600.0 * voice["harsh"])) ** 2)
-        mag[k] = amp
-
-    spec_ = mag * np.exp(1j * phase)
-    spec_[0] = 0.0
-    tone = np.fft.irfft(spec_, n)
-    tone /= np.max(np.abs(tone)) or 1.0
-
-    # Emme/egzoz gürültüsü: ateşleme darbeleriyle genlik modülasyonu
-    noise = _band_noise(n, 180, 5200, seed + 17, tilt=-0.35)
-    noise /= np.max(np.abs(noise)) or 1.0
-    t = np.arange(n) / SR
-    pulse = 0.55 + 0.45 * np.abs(np.sin(np.pi * f_crank * order_firing * t))
-    sig = tone + voice["noise"] * noise * pulse
-
-    sig = _soft_clip(sig, 1.5 + 1.4 * voice["harsh"])
-    return sig
-
-
-# --------------------------------------------------------------------------
-# Diğer sesler
-# --------------------------------------------------------------------------
-
-def engine_start(seconds=1.4):
-    n = int(seconds * SR)
-    t = np.arange(n) / SR
-    out = np.zeros(n)
-
-    crank_end = int(0.85 * SR)
-    tc = t[:crank_end]
-    # marş motoru: ~11 Hz'de darbeli, tiz bir vınlama
-    whine = np.sin(2 * np.pi * 1250 * tc) * 0.35 + np.sin(2 * np.pi * 640 * tc) * 0.25
-    chug = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * 11 * tc))
-    grind = _band_noise(crank_end, 300, 4000, 91) * 0.5
-    out[:crank_end] = (whine + grind) * chug * np.linspace(0.6, 1.0, crank_end)
-
-    # ateşleme: devir hızla yükselip rölantiye oturur
-    fire = np.arange(crank_end, n)
-    tf = (fire - crank_end) / SR
-    rpm = 600 + 2400 * np.exp(-tf * 4.2) * (1 - np.exp(-tf * 26))
-    ph = 2 * np.pi * np.cumsum(rpm / 60.0 * 2.0) / SR
-    burst = (np.sin(ph) + 0.5 * np.sin(2 * ph) + 0.3 * np.sin(3 * ph))
-    burst += _band_noise(len(fire), 150, 3500, 92) * 0.4
-    out[crank_end:] = burst * np.minimum(1.0, tf * 12) * np.exp(-tf * 0.8)
-    return _fade(_soft_clip(out, 1.8), 0.01, 0.06)
-
-
-def engine_stop(seconds=0.9):
-    n = int(seconds * SR)
-    t = np.arange(n) / SR
-    rpm = 900 * np.exp(-t * 3.6)
-    ph = 2 * np.pi * np.cumsum(rpm / 60.0 * 2.0) / SR
-    sig = (np.sin(ph) + 0.45 * np.sin(2 * ph)) * np.exp(-t * 2.4)
-    sig += _band_noise(n, 120, 2200, 93) * 0.25 * np.exp(-t * 5.0)
-    return _fade(_soft_clip(sig, 1.4), 0.005, 0.15)
-
 
 def horn(seconds=0.7):
     n = int(seconds * SR)
@@ -287,18 +170,8 @@ def wrench_use(seconds=0.6):
     return _fade(_soft_clip(sig, 1.2), 0.001, 0.05)
 
 
-def idle_loop(seconds=2.0):
-    """Rölanti: düşük devirli, düzensiz, sakin bir motor sesi."""
-    voice = dict(cyl=4, harsh=0.30, noise=0.26, halforder=0.18)
-    return engine_loop(voice, seconds, seed=5) * 0.8
-
-
-# --------------------------------------------------------------------------
-
 def main():
     made = {}
-    made["engine_start"] = _write("engine_start", engine_start(spec.SOUNDS["engine_start"][1]))
-    made["engine_stop"] = _write("engine_stop", engine_stop(spec.SOUNDS["engine_stop"][1]))
     made["horn"] = _write("horn", horn(spec.SOUNDS["horn"][1]))
     made["brake_squeal"] = _write("brake_squeal", brake_squeal(spec.SOUNDS["brake_squeal"][1]))
     # Vorbis kodlaması tepe değeri bir miktar aşabildiği için çakıl döngüsünde

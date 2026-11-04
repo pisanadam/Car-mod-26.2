@@ -379,8 +379,9 @@ def gen_sounds_json():
         }
     # Motor kayıtları: bütün katmanlar aynı altyazıyı paylaşır.
     for sid, path in spec.engine_voice_sounds().items():
+        part = sid.rsplit("_", 1)[1]
         obj[sid] = {
-            "subtitle": f"subtitles.{NS}.engine_running",
+            "subtitle": f"subtitles.{NS}." + {"start": "engine_start", "stop": "engine_stop"}.get(part, "engine_running"),
             "sounds": [{"name": f"{NS}:{path}", "stream": False, "attenuation_distance": 32}],
         }
     write(ASSETS / "sounds.json", obj)

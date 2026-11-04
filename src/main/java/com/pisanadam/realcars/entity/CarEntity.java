@@ -679,8 +679,11 @@ public class CarEntity extends VehicleEntity {
 			this.gear = GearBox.NEUTRAL;
 		}
 		if (!this.level().isClientSide()) {
-			this.level().playSound(null, this, on ? ModSounds.ENGINE_START : ModSounds.ENGINE_STOP,
-				SoundSource.NEUTRAL, 0.9F, 1.0F);
+			// Her aracın kendi kaydından marş ve kapatma; takılı motor
+			// değiştirildiyse o motorun temsilci kaydından.
+			final EngineVoice voice = EngineVoice.of(this.model, this.engineType());
+			this.level().playSound(null, this, on ? ModSounds.engineStart(voice) : ModSounds.engineStop(voice),
+				SoundSource.NEUTRAL, 1.0F, 1.0F);
 		}
 	}
 
