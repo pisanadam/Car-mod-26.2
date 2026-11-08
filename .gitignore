@@ -30,3 +30,4 @@ tools/.hd_cache/
 tools/.snd_cache/
 versions/*/run/
 versions/*/build/
+dist/
