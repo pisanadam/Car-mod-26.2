@@ -1,0 +1,34 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap'
+}
+
+ext {
+	mc = '1.21.1'
+	fabricApi = '0.116.17+1.21.1'
+	javaRelease = 21
+}
+
+apply from: rootProject.file('versions/common.gradle')
+
+dependencies {
+	// 26.x'te Minecraft ile gelen null işaretleri; eski sürümlerde ayrıca eklenir.
+	compileOnly 'org.jspecify:jspecify:1.0.0'
+}
+
+loom {
+	accessWidenerPath = file('src/main/resources/realcars.accesswidener')
+}
+
+loom {
+	runs {
+		// Fabric'in istemci test API'si bu sürümde yok; yerine DevAutotest.
+		// Önce tools/smoke_test.sh ile bir dünya üretilir (run/smoketest).
+		autotest {
+			inherit client
+			name "Client Autotest"
+			vmArg "-Drealcars.autotest=true"
+			programArgs "--quickPlaySingleplayer", "smoke"
+			runDir "run/autotest"
+		}
+	}
+}

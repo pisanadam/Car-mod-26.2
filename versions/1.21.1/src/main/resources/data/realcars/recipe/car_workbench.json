@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "show_notification": false,
+  "key": {
+    "S": {
+      "item": "realcars:steel_plate"
+    },
+    "A": {
+      "item": "realcars:assembly_table"
+    },
+    "I": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "pattern": [
+    "SSS",
+    "SAS",
+    "III"
+  ],
+  "result": {
+    "id": "realcars:car_workbench"
+  }
+}

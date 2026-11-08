@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": false,
+  "key": {
+    "R": {
+      "item": "realcars:rubber"
+    },
+    "S": {
+      "item": "realcars:steel_plate"
+    }
+  },
+  "pattern": [
+    " R ",
+    "RSR",
+    " R "
+  ],
+  "result": {
+    "id": "realcars:wheel_sport",
+    "count": 2
+  }
+}

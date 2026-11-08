@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "show_notification": false,
+  "key": {
+    "A": {
+      "item": "realcars:asphalt"
+    },
+    "D": {
+      "item": "minecraft:yellow_dye"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "ADA",
+    "AAA"
+  ],
+  "result": {
+    "id": "realcars:road_line_yellow",
+    "count": 8
+  }
+}

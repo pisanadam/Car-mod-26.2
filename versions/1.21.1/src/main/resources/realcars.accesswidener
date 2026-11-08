@@ -1,0 +1,3 @@
+accessWidener v2 named
+# 1.21.1'de VehicleEntity#getDropItem paket içine kapalı; araç bunu geçersiz kılabilsin diye açılır.
+accessible method net/minecraft/world/entity/vehicle/VehicleEntity getDropItem ()Lnet/minecraft/world/item/Item;

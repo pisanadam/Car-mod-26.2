@@ -1,0 +1,34 @@
+package com.pisanadam.realcars.client.input;
+
+import com.pisanadam.realcars.entity.CarEntity;
+import net.minecraft.client.Minecraft;
+import com.pisanadam.realcars.entity.DriverInput;
+import net.minecraft.client.player.Input;
+
+/**
+ * Yerel oyuncunun tuş durumunu sürdüğü araca aktarır.
+ *
+ * <p>Araç sürülürken fiziği sürücünün istemcisi işletir; tuşları araca bu
+ * sınıf aktarır. Fizik, dünya tick'inden önce doğru girdiyi görsün diye tick'in
+ * başında çağrılır.
+ */
+public final class CarInputHandler {
+	private CarInputHandler() {
+	}
+
+	public static void tick(final Minecraft client) {
+		if (client.player == null) {
+			return;
+		}
+		if (client.player.getVehicle() instanceof CarEntity car
+			&& car.getControllingPassenger() == client.player) {
+			// Aracı yalnızca ilk binen sürer; yolcunun tuşları direksiyona
+			// karışmamalı. Ayrıca ekran açıkken (örneğin modifiye menüsü) gaz
+			// basılı kalmasın.
+			final Input keys = client.player.input;
+			car.setClientInput(client.screen == null
+				? new DriverInput(keys.up, keys.down, keys.left, keys.right, keys.jumping)
+				: DriverInput.EMPTY);
+		}
+	}
+}

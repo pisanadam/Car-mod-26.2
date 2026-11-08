@@ -1,4 +1,4 @@
-# RealCars — Minecraft 26.3 Araba Modu
+# RealCars — Minecraft Araba Modu (26.3, 26.2, 1.21.11, 1.21.1, 1.20.1)
 
 Gerçek hayattaki arabaları Minecraft'a getiren bir Fabric modu: parçalardan araba
 craftlarsın, motoru çalıştırıp sürersin, km/saat göstergesinden hızını görürsün,
@@ -7,23 +7,39 @@ tekerleğini ve rüzgarlığını değiştirirsin.
 
 | | |
 |---|---|
-| **Minecraft** | 26.3 (Java Edition) |
+| **Minecraft** | 26.3, 26.2, 1.21.11, 1.21.1, 1.20.1 (Java Edition) — her biri için ayrı jar |
 | **Mod yükleyici** | Fabric Loader 0.20.1+ |
-| **Gerekli** | Fabric API 0.165.0+26.3 |
-| **Java** | 25 (Minecraft 26.x zorunlu kılıyor) |
+| **Gerekli** | Fabric API (sürümüne uygun olanı, aşağıdaki tabloya bak) |
+| **Java** | 26.x için 25, 1.21.x için 21, 1.20.1 için 17 |
 | **3B modeller** | Gerçek araç modelleri, CC BY 4.0 — bkz. [CREDITS.md](CREDITS.md) |
 
 ---
 
 ## Kurulum
 
-1. [Fabric Loader](https://fabricmc.net/use/) 0.20.1 veya üstünü Minecraft 26.3 için kur.
-2. [Fabric API](https://modrinth.com/mod/fabric-api) sürüm `0.165.0+26.3`'yi indir.
-3. Bu modun `realcars-1.1.0.jar` dosyasını ve Fabric API'yi `.minecraft/mods`
-   klasörüne at.
+1. [Fabric Loader](https://fabricmc.net/use/) 0.20.1 veya üstünü kendi Minecraft sürümün için kur.
+2. Aşağıdaki tablodan sürümüne uyan jar'ı ve [Fabric API](https://modrinth.com/mod/fabric-api)'yi indir.
+3. İkisini de `.minecraft/mods` klasörüne at.
 4. Oyunu Fabric profiliyle başlat.
 
-Kaynaktan derlemek için: `JAVA_HOME=<jdk25> ./gradlew build` → `build/libs/realcars-1.1.0.jar`
+| Minecraft | Mod jar'ı | Fabric API | Java |
+|---|---|---|---|
+| 26.3 | `realcars-1.1.0.jar` | 0.165.0+26.3 | 25 |
+| 26.2 | `realcars-1.1.0+26.2.jar` | 0.161.0+26.2 | 25 |
+| 1.21.11 | `realcars-1.1.0+1.21.11.jar` | 0.141.6+1.21.11 | 21 |
+| 1.21.1 | `realcars-1.1.0+1.21.1.jar` | 0.116.17+1.21.1 | 21 |
+| 1.20.1 | `realcars-1.1.0+1.20.1.jar` | 0.92.12+1.20.1 | 17 |
+
+Sürümler Modrinth'te Fabric için en çok indirilen Minecraft sürümlerine göre
+seçildi. Oynanış, araçlar, 3B modeller ve sesler hepsinde aynıdır.
+
+Kaynaktan derlemek için (hepsi JDK 25 ile derlenir, hedef Java sürümünü Gradle ayarlar):
+
+```bash
+JAVA_HOME=<jdk25> ./gradlew build                    # 26.3 → build/libs/realcars-1.1.0.jar
+JAVA_HOME=<jdk25> ./gradlew :mc-1.21.1:build         # → versions/1.21.1/build/libs/
+JAVA_HOME=<jdk25> ./gradlew build :mc-26.2:build :mc-1.21.11:build :mc-1.21.1:build :mc-1.20.1:build
+```
 
 ---
 
@@ -355,6 +371,26 @@ otomatik üretilir. `validate_assets.py` iki dosyanın uyumunu kontrol eder.
 Gerçek bir 3B model de istiyorsan `tools/hd_models.py`'ye üçüncü bir kayıt ekle
 ve `import_hd_models.py`'yi çalıştır; yoksa araç parametrik gövdeyle çizilir.
 
+### Çok sürümlü yapı
+
+Kök proje (`src/`) Minecraft 26.3'tür. Diğer sürümler `versions/<sürüm>/` altında
+birer Gradle alt projesidir (`:mc-<sürüm>`); her birinin kendi `src/` kopyası
+vardır, çünkü Minecraft'ın API'si sürümden sürüme çok değişiyor (26.x'te çizim
+durumları ve gönderim kuyruğu, 1.21.1'de doğrudan çizim, 1.20.1'de NBT ve eski
+ağ paketleri). Ortak `versions/common.gradle` derlemeyi kurar.
+
+3B modeller, sesler, dokular ve dil dosyaları kopyalanmaz: kök projenin
+`src/main/resources`'ı bütün sürümlere paylaşılır. Eski sürümlerin farklı
+biçimde istediği veri dosyaları (tarif malzemeleri, `models/item`, 1.20.1'in
+çoğul klasör adları) ortaklardan türetilir:
+
+```bash
+python3 tools/legacy_resources.py 1.21.1 1.20.1
+```
+
+Kökte bir oynanış değişikliği yapınca aynısını `versions/*/src` altındaki
+kopyalara da taşımak gerekir.
+
 ### Testler
 
 ```bash
@@ -375,6 +411,15 @@ JAVA_HOME=<jdk25> ./gradlew runClientGametest
 # yazılım Vulkan sürücüsü (lavapipe) yeterli:
 #   sudo apt-get install xvfb mesa-vulkan-drivers libvulkan1
 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGametest
+
+# Diğer sürümler:
+MC=1.21.1 tools/smoke_test.sh                      # sunucu testi, her sürümde
+xvfb-run -a ./gradlew :mc-1.21.11:runClientGametest  # 26.2 ve 1.21.11'de aynı test
+# 1.21.1 ve 1.20.1'de Fabric'in istemci test API'si yok; onun yerine dünyaya
+# girip araçları dizen, birine binen, modifiye ekranını açan ve her adımda
+# ekran görüntüsü alan küçük bir otomatik test var (önce smoke_test bir dünya üretir):
+mkdir -p versions/1.21.1/run/autotest/saves && cp -r versions/1.21.1/run/smoketest versions/1.21.1/run/autotest/saves/smoke
+LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a ./gradlew :mc-1.21.1:runAutotest
 ```
 
 ---

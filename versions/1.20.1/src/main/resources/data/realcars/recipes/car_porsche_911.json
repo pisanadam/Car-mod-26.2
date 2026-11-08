@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": false,
+  "key": {
+    "W": {
+      "item": "realcars:wheel_sport"
+    },
+    "G": {
+      "item": "realcars:windshield"
+    },
+    "E": {
+      "item": "realcars:engine_flat6"
+    },
+    "C": {
+      "item": "realcars:chassis_sport"
+    },
+    "T": {
+      "item": "realcars:transmission_sport"
+    },
+    "S": {
+      "item": "realcars:car_seat"
+    }
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "item": "realcars:car_porsche_911"
+  }
+}

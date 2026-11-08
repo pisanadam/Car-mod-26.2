@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": false,
+  "key": {
+    "W": {
+      "item": "realcars:wheel_offroad"
+    },
+    "G": {
+      "item": "realcars:windshield"
+    },
+    "E": {
+      "item": "realcars:engine_v6"
+    },
+    "C": {
+      "item": "realcars:chassis_offroad"
+    },
+    "T": {
+      "item": "realcars:transmission_automatic"
+    },
+    "S": {
+      "item": "realcars:car_seat"
+    }
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "item": "realcars:car_wrangler"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": false,
+  "key": {
+    "W": {
+      "item": "realcars:wheel_street"
+    },
+    "G": {
+      "item": "realcars:windshield"
+    },
+    "E": {
+      "item": "realcars:engine_flat4"
+    },
+    "C": {
+      "item": "realcars:chassis_van"
+    },
+    "T": {
+      "item": "realcars:transmission_manual"
+    },
+    "S": {
+      "item": "realcars:car_seat"
+    }
+  },
+  "pattern": [
+    "WGW",
+    "ECT",
+    "WSW"
+  ],
+  "result": {
+    "item": "realcars:car_transporter"
+  }
+}

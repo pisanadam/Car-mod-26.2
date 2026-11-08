@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "show_notification": false,
+  "key": {
+    "S": {
+      "item": "realcars:steel_plate"
+    }
+  },
+  "pattern": [
+    " S ",
+    "SSS"
+  ],
+  "result": {
+    "id": "realcars:spoiler_ducktail"
+  }
+}

@@ -29,11 +29,19 @@ loom {
 	}
 }
 
+// 26.x isimleri karıştırılmamış gelir: eşleme ve yeniden eşleme gerekmez.
+def unobfuscated = mc.startsWith('26.')
+
 dependencies {
 	minecraft "com.mojang:minecraft:${mc}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+	if (unobfuscated) {
+		implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+		implementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+	} else {
+		mappings loom.officialMojangMappings()
+		modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+	}
 }
 
 def sharedResources = rootProject.file('src/main/resources')

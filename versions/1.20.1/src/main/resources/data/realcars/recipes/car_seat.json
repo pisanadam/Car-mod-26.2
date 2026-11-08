@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "show_notification": false,
+  "key": {
+    "L": {
+      "item": "minecraft:leather"
+    },
+    "W": {
+      "tag": "minecraft:wool"
+    },
+    "S": {
+      "item": "realcars:steel_plate"
+    }
+  },
+  "pattern": [
+    " L ",
+    "LWL",
+    "SSS"
+  ],
+  "result": {
+    "item": "realcars:car_seat"
+  }
+}

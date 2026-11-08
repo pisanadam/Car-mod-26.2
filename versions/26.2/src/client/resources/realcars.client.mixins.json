@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.pisanadam.realcars.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"EntityRenderStateMixin",
+		"LivingEntityRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
