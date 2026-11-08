@@ -1,0 +1,71 @@
+// versions/<sürüm>/build.gradle tarafından uygulanır. Uygulamadan önce şunlar
+// tanımlı olmalı: ext.mc, ext.fabricApi, ext.javaRelease.
+//
+// Kaynaklar: kök projenin src/main/resources'ı (3B modeller, sesler, dokular,
+// dil dosyaları) paylaşılır; sürüme özgü veri biçimleri (tarifler, eşya
+// tanımları, etiketler...) alt projenin kendi src/main/resources'ında olur ve
+// aynı yoldaki ortak dosyanın yerine geçer.
+
+version = "${rootProject.mod_version}+${mc}"
+group = rootProject.maven_group
+base { archivesName = 'realcars' }
+
+loom {
+	splitEnvironmentSourceSets()
+	runs {
+		// Oyunu açıp araçları fotoğraflayan istemci testi (kök projeyle aynı).
+		clientGametest {
+			inherit client
+			name "Client Game Test"
+			vmArg "-Dfabric.client.gametest"
+			runDir "run/clientGametest"
+		}
+	}
+	mods {
+		"realcars" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${mc}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApi}"
+}
+
+def sharedResources = rootProject.file('src/main/resources')
+def overrides = file('src/main/resources')
+def excluded = project.hasProperty('sharedExcludes') ? project.sharedExcludes : []
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "mc", mc
+	// Önce alt projenin kendi dosyaları, sonra ortaklar: aynı yoldaysa alt proje kazanır.
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from(sharedResources) {
+		exclude 'fabric.mod.json'
+		exclude excluded
+	}
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version, "mc": mc
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = javaRelease
+	it.options.encoding = "UTF-8"
+	it.options.compilerArgs += ['-Xmaxerrs', '2000']
+}
+
+java {
+	sourceCompatibility = JavaVersion.toVersion(javaRelease)
+	targetCompatibility = JavaVersion.toVersion(javaRelease)
+}
+
+jar {
+	from(rootProject.file("LICENSE")) { rename { "${it}_realcars" } }
+	from(rootProject.file("CREDITS.md"))
+}

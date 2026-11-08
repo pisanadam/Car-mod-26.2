@@ -28,3 +28,5 @@ __pycache__/
 *.pyc
 tools/.hd_cache/
 tools/.snd_cache/
+versions/*/run/
+versions/*/build/

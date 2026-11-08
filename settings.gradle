@@ -10,3 +10,12 @@ pluginManagement {
 }
 
 rootProject.name = 'realcars'
+
+// Modun eski Minecraft sürümleri. Her biri kendi Java kaynağını taşır;
+// 3B modeller, sesler ve dokular kök projeden paylaşılır (versions/common.gradle).
+['1.21.11', '1.21.1', '1.20.1'].each { mc ->
+	if (file("versions/${mc}/build.gradle").exists()) {
+		include "mc-${mc}"
+		project(":mc-${mc}").projectDir = file("versions/${mc}")
+	}
+}

@@ -1,5 +1,8 @@
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	// Eski (karışık isimli) Minecraft sürümleri için aynı Loom'un yeniden
+	// eşlemeli eklentisi; versions/ altındaki alt projeler kullanır.
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}" apply false
 	id 'maven-publish'
 }
 

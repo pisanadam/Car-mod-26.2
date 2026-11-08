@@ -6,10 +6,19 @@
 # sonra günlükte kayıt/mixin/eksik doku hatası arar.
 #
 # Kullanım: JAVA_HOME=/opt/jdk25 tools/smoke_test.sh
+#           MC=1.21.11 JAVA_HOME=/opt/jdk25 tools/smoke_test.sh   (eski sürüm alt projesi)
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RUN="$ROOT/run"
+# MC=1.21.11 gibi verilirse versions/ altındaki o sürümün alt projesi sınanır.
+MC="${MC:-}"
+if [ -n "$MC" ]; then
+	TASK=":mc-$MC:runServer"
+	RUN="$ROOT/versions/$MC/run"
+else
+	TASK="runServer"
+	RUN="$ROOT/run"
+fi
 LOG="${SMOKE_LOG:-$RUN/smoke.log}"
 FIFO="$RUN/smoke.stdin"
 BOOT_TIMEOUT="${BOOT_TIMEOUT:-420}"
@@ -33,7 +42,7 @@ mkfifo "$FIFO"
 sleep infinity > "$FIFO" &
 HOLDER=$!
 
-( cd "$ROOT" && ./gradlew runServer --no-daemon --console=plain < "$FIFO" > "$LOG" 2>&1 ) &
+( cd "$ROOT" && ./gradlew "$TASK" --no-daemon --console=plain < "$FIFO" > "$LOG" 2>&1 ) &
 GRADLE=$!
 
 cleanup() {
